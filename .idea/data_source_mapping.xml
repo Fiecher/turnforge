@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/src/main/java/com/github/fiecher/infrastructure/db/postgres/init-scripts/01-schema.sql" value="0554c3ff-acb3-4ba5-872f-c361655488f3" />
-  </component>
-</project>
