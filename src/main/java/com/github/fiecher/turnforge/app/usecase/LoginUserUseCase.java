@@ -1,7 +1,7 @@
 package com.github.fiecher.turnforge.app.usecase;
 
 import com.github.fiecher.turnforge.app.dtos.LoginRequest;
-import com.github.fiecher.turnforge.domain.models.User;
+import com.github.fiecher.turnforge.app.dtos.UserDetails;
 import com.github.fiecher.turnforge.domain.services.UserService;
 
 import java.util.Objects;
@@ -14,7 +14,8 @@ public class LoginUserUseCase {
         this.userService = Objects.requireNonNull(userService);
     }
 
-    public Optional<User> execute(LoginRequest request) {
-        return userService.authenticateUser(request.login(), request.password());
+    public Optional<UserDetails> execute(LoginRequest request) {
+        return userService.authenticateUser(request.login(), request.password())
+                .map(user -> new UserDetails(user.getID(), user.getLogin(), user.getRole()));
     }
 }

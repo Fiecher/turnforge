@@ -2,12 +2,12 @@ package com.github.fiecher.turnforge.presentation.cli.commands.character;
 
 import com.github.fiecher.turnforge.app.dtos.CharacterCreationResponse;
 import com.github.fiecher.turnforge.app.dtos.CreateCharacterRequest;
+import com.github.fiecher.turnforge.app.dtos.UserDetails;
 import com.github.fiecher.turnforge.app.usecase.CreateCharacterUseCase;
 import com.github.fiecher.turnforge.presentation.cli.ApplicationContext;
+import com.github.fiecher.turnforge.presentation.cli.commands.Command;
 import com.github.fiecher.turnforge.presentation.cli.input.InputReader;
 import com.github.fiecher.turnforge.presentation.cli.output.View;
-import com.github.fiecher.turnforge.presentation.cli.commands.Command;
-import com.github.fiecher.turnforge.domain.models.User;
 
 public class CreateCharacterCommand implements Command {
     private final CreateCharacterUseCase createCharacterUseCase;
@@ -32,8 +32,8 @@ public class CreateCharacterCommand implements Command {
         if (!context.isAuthenticated()){
             throw new IllegalStateException("Command can only be run by an authenticated user.");
         }
-        User currentUser = context.getCurrentUser();
-        Long userID = currentUser.getID();
+        UserDetails currentUser = context.getCurrentUser();
+        Long userID = currentUser.id();
 
         try {
             view.showMessage("\n --- Creating Character ---");

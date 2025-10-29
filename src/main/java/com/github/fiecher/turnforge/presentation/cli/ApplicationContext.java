@@ -1,15 +1,15 @@
 package com.github.fiecher.turnforge.presentation.cli;
 
-import com.github.fiecher.turnforge.domain.models.User;
+import com.github.fiecher.turnforge.app.dtos.UserDetails;
 
 public class ApplicationContext {
-    private User currentUser;
+    private UserDetails currentUser;
 
-    public User getCurrentUser() {
+    public UserDetails getCurrentUser() {
         return currentUser;
     }
 
-    public void login(User user) {
+    public void login(UserDetails user) {
         this.currentUser = user;
     }
 

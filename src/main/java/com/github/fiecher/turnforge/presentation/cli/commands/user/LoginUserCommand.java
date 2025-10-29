@@ -1,12 +1,12 @@
 package com.github.fiecher.turnforge.presentation.cli.commands.user;
 
 import com.github.fiecher.turnforge.app.dtos.LoginRequest;
+import com.github.fiecher.turnforge.app.dtos.UserDetails;
 import com.github.fiecher.turnforge.app.usecase.LoginUserUseCase;
 import com.github.fiecher.turnforge.presentation.cli.ApplicationContext;
+import com.github.fiecher.turnforge.presentation.cli.commands.Command;
 import com.github.fiecher.turnforge.presentation.cli.input.InputReader;
 import com.github.fiecher.turnforge.presentation.cli.output.View;
-import com.github.fiecher.turnforge.presentation.cli.commands.Command;
-import com.github.fiecher.turnforge.domain.models.User;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -41,16 +41,16 @@ public class LoginUserCommand implements Command {
             String login = reader.readLine("Enter login: ");
             String password = reader.readLine("Enter password: ");
 
-            Optional<User> user = authenticateUserUseCase.execute(
+            Optional<UserDetails> user = authenticateUserUseCase.execute(
                     new LoginRequest(login, password)
             );
 
             if (user.isPresent()) {
-                User authenticatedUser = user.get();
+                UserDetails authenticatedUser = user.get();
 
                 context.login(authenticatedUser);
 
-                view.showSuccess("Login successful! Welcome, " + authenticatedUser.getLogin() + ".");
+                view.showSuccess("Login successful! Welcome, " + authenticatedUser.login() + ".");
             } else {
                 view.showError("Login failed: Invalid login or password.");
             }
