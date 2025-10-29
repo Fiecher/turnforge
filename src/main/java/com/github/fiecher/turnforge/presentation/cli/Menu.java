@@ -34,7 +34,7 @@ public class Menu {
     private Map<Integer, Command> showMenu(boolean isPublicMenu) {
         Map<Integer, Command> currentCommands = isPublicMenu ? publicCommands : authenticatedCommands;
 
-        view.showMessage(isPublicMenu ? "\n--- Main Menu ---" : "\n--- User Menu: " + context.getCurrentUser().getLogin() + " ---");
+        view.showMessage(isPublicMenu ? "\n--- Main Menu ---" : "\n--- User Menu: " + context.getCurrentUser().login() + " ---");
 
         currentCommands.forEach((number, command) -> view.showMessage(number + ". " + command.getName()));
 
