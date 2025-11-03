@@ -1,6 +1,6 @@
 package com.github.fiecher.turnforge.presentation.cli;
 
-import com.github.fiecher.turnforge.app.dtos.UserDetails;
+import com.github.fiecher.turnforge.app.dtos.responses.UserDetails;
 
 public class ApplicationContext {
     private UserDetails currentUser;

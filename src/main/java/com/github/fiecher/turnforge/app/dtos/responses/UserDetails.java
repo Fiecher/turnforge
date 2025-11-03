@@ -1,4 +1,4 @@
-package com.github.fiecher.turnforge.app.dtos;
+package com.github.fiecher.turnforge.app.dtos.responses;
 
 import com.github.fiecher.turnforge.domain.models.UserRole;
 

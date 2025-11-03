@@ -1,7 +1,7 @@
 package com.github.fiecher.turnforge.app.usecase;
 
-import com.github.fiecher.turnforge.app.dtos.AddAbilityRequest;
-import com.github.fiecher.turnforge.app.dtos.AddAbilityResponse;
+import com.github.fiecher.turnforge.app.dtos.requests.AddAbilityRequest;
+import com.github.fiecher.turnforge.app.dtos.responses.AddAbilityResponse;
 import com.github.fiecher.turnforge.domain.services.CharacterService;
 
 import java.util.Objects;

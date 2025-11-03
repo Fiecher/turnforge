@@ -1,7 +1,7 @@
 package com.github.fiecher.turnforge.app.usecase;
 
-import com.github.fiecher.turnforge.app.dtos.UpdateStatsRequest;
-import com.github.fiecher.turnforge.app.dtos.UpdateStatsResponse;
+import com.github.fiecher.turnforge.app.dtos.requests.UpdateStatsRequest;
+import com.github.fiecher.turnforge.app.dtos.responses.UpdateStatsResponse;
 import com.github.fiecher.turnforge.domain.services.CharacterService;
 import java.util.Objects;
 

@@ -1,6 +1,6 @@
 package com.github.fiecher.turnforge.app.usecase;
 
-import com.github.fiecher.turnforge.app.dtos.CreateUserRequest;
+import com.github.fiecher.turnforge.app.dtos.requests.CreateUserRequest;
 import com.github.fiecher.turnforge.domain.services.UserService;
 
 public class CreateUserUseCase implements UseCase<CreateUserRequest, Long> {

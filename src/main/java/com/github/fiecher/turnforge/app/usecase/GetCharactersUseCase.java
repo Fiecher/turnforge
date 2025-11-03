@@ -1,8 +1,8 @@
 package com.github.fiecher.turnforge.app.usecase;
 
-import com.github.fiecher.turnforge.app.dtos.CharacterDetails;
-import com.github.fiecher.turnforge.app.dtos.GetCharactersRequest;
-import com.github.fiecher.turnforge.app.dtos.GetCharactersResponse;
+import com.github.fiecher.turnforge.app.dtos.responses.CharacterDetails;
+import com.github.fiecher.turnforge.app.dtos.requests.GetCharactersRequest;
+import com.github.fiecher.turnforge.app.dtos.responses.GetCharactersResponse;
 import com.github.fiecher.turnforge.domain.models.Ability;
 import com.github.fiecher.turnforge.domain.models.Skill;
 import com.github.fiecher.turnforge.domain.models.Armor;

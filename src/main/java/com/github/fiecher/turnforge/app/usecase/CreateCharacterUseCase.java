@@ -1,7 +1,7 @@
 package com.github.fiecher.turnforge.app.usecase;
 
-import com.github.fiecher.turnforge.app.dtos.CharacterCreationResponse;
-import com.github.fiecher.turnforge.app.dtos.CreateCharacterRequest;
+import com.github.fiecher.turnforge.app.dtos.responses.CharacterCreationResponse;
+import com.github.fiecher.turnforge.app.dtos.requests.CreateCharacterRequest;
 import com.github.fiecher.turnforge.domain.services.CharacterService;
 
 import java.util.Objects;

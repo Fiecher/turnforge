@@ -1,8 +1,8 @@
 package com.github.fiecher.turnforge.presentation.cli.commands.character;
 
-import com.github.fiecher.turnforge.app.dtos.CharacterCreationResponse;
-import com.github.fiecher.turnforge.app.dtos.CreateCharacterRequest;
-import com.github.fiecher.turnforge.app.dtos.UserDetails;
+import com.github.fiecher.turnforge.app.dtos.responses.CharacterCreationResponse;
+import com.github.fiecher.turnforge.app.dtos.requests.CreateCharacterRequest;
+import com.github.fiecher.turnforge.app.dtos.responses.UserDetails;
 import com.github.fiecher.turnforge.app.usecase.CreateCharacterUseCase;
 import com.github.fiecher.turnforge.presentation.cli.ApplicationContext;
 import com.github.fiecher.turnforge.presentation.cli.commands.Command;

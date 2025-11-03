@@ -1,7 +1,7 @@
 package com.github.fiecher.turnforge.presentation.cli.commands.user;
 
-import com.github.fiecher.turnforge.app.dtos.LoginRequest;
-import com.github.fiecher.turnforge.app.dtos.UserDetails;
+import com.github.fiecher.turnforge.app.dtos.requests.LoginRequest;
+import com.github.fiecher.turnforge.app.dtos.responses.UserDetails;
 import com.github.fiecher.turnforge.app.usecase.LoginUserUseCase;
 import com.github.fiecher.turnforge.presentation.cli.ApplicationContext;
 import com.github.fiecher.turnforge.presentation.cli.commands.Command;
