@@ -16,6 +16,9 @@ public class Armor {
         this.name = Objects.requireNonNull(name);
     }
 
+    public Armor() {
+    }
+
     public Armor(Long id, String name, String description, String image, short ac, String type, Double weight, Integer price) {
         this.id = id;
         this.name = Objects.requireNonNull(name);

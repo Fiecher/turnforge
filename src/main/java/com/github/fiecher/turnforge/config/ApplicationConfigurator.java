@@ -3,15 +3,16 @@ package com.github.fiecher.turnforge.config;
 import com.github.fiecher.turnforge.config.containers.RepositoryContainer;
 import com.github.fiecher.turnforge.config.containers.ServiceContainer;
 import com.github.fiecher.turnforge.config.containers.UseCaseContainer;
-import com.github.fiecher.turnforge.config.factories.InMemoryRepositoryFactory;
+import com.github.fiecher.turnforge.config.factories.CliCommandFactory;
+import com.github.fiecher.turnforge.config.factories.PostgresRepositoryFactory;
 import com.github.fiecher.turnforge.config.factories.ServiceFactory;
 import com.github.fiecher.turnforge.config.factories.UseCaseFactory;
 import com.github.fiecher.turnforge.domain.services.PasswordGenerator;
+import com.github.fiecher.turnforge.infrastructure.db.postgres.PostgresConnectionManager;
 import com.github.fiecher.turnforge.presentation.cli.ApplicationContext;
-import com.github.fiecher.turnforge.config.factories.CliCommandFactory;
 import com.github.fiecher.turnforge.presentation.cli.Menu;
-import com.github.fiecher.turnforge.presentation.cli.output.View;
 import com.github.fiecher.turnforge.presentation.cli.input.InputReader;
+import com.github.fiecher.turnforge.presentation.cli.output.View;
 
 public class ApplicationConfigurator {
 
@@ -25,8 +26,9 @@ public class ApplicationConfigurator {
         this.reader = new InputReader();
     }
 
-    public Menu configureAndBuildMenu(String salt) {
+    public Menu configureAndBuildMenu(String salt, String URL, String USER, String PASSWORD, String DRIVER) {
         PasswordGenerator.init(salt);
+        PostgresConnectionManager.init(URL, USER, PASSWORD, DRIVER);
 
         CliCommandFactory commandFactory = getCliCommandFactory();
 
@@ -41,7 +43,7 @@ public class ApplicationConfigurator {
     }
 
     private CliCommandFactory getCliCommandFactory() {
-        InMemoryRepositoryFactory repoFactory = new InMemoryRepositoryFactory();
+        PostgresRepositoryFactory repoFactory = new PostgresRepositoryFactory();
         RepositoryContainer repositories = repoFactory.createAllRepositories();
 
         ServiceFactory serviceFactory = new ServiceFactory(repositories);

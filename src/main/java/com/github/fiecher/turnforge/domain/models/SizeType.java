@@ -1,5 +1,5 @@
 package com.github.fiecher.turnforge.domain.models;
 
-enum SizeType {
+public enum SizeType {
     TINY, SMALL, MEDIUM, LARGE, HUGE, GARGANTUAN
 }

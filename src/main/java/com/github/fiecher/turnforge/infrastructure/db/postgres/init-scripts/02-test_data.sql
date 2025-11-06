@@ -32,7 +32,7 @@ INSERT INTO characters (user_id, name, level, strength, dexterity, constitution,
                         intelligence, wisdom, charisma, class, race, background, size, money)
 SELECT id,
        'Character_' || id,
-       random() * 20,
+       random() * 20 + 1,
        random() * 20,
        random() * 20,
        random() * 20,

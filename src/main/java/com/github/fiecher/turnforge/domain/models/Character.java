@@ -180,6 +180,7 @@ public final class Character {
         return class_;
     }
 
+
     public String getSubclass() {
         return subclass;
     }
