@@ -4,7 +4,7 @@ plugins {
     id 'org.javamodularity.moduleplugin' version '1.8.12'
 }
 
-group 'com.github.fiecher.dnd'
+group 'com.github.fiecher.turnforge'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -15,16 +15,13 @@ ext {
     junitVersion = '5.10.0'
 }
 
-sourceCompatibility = '22'
-targetCompatibility = '22'
-
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
 application {
-    mainModule = 'com.github.fiecher.dnd.dnd'
-    mainClass = 'com.github.fiecher.dnd.dnd.HelloApplication'
+    mainModule = 'com.github.fiecher.turnforge'
+    mainClass = 'com.github.fiecher.turnforge.Main'
 }
 
 dependencies {
