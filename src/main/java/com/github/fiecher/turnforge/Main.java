@@ -6,7 +6,6 @@ import com.github.fiecher.turnforge.presentation.cli.Menu;
 
 public class Main {
 
-    // Внутренний класс для хранения конфигурации БД
     private static class DatabaseConfig {
         final String url;
         final String user;

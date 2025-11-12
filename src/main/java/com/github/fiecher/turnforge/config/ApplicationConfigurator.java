@@ -19,6 +19,7 @@ public class ApplicationConfigurator {
     private final ApplicationContext applicationContext;
     private final View view;
     private final InputReader reader;
+    private PostgresConnectionManager connectionManager;
 
     public ApplicationConfigurator() {
         this.applicationContext = new ApplicationContext();
@@ -28,7 +29,7 @@ public class ApplicationConfigurator {
 
     public Menu configureAndBuildMenu(String salt, String URL, String USER, String PASSWORD, String DRIVER) {
         PasswordGenerator.init(salt);
-        PostgresConnectionManager.init(URL, USER, PASSWORD, DRIVER);
+        connectionManager = PostgresConnectionManager.init(URL, USER, PASSWORD, DRIVER);
 
         CliCommandFactory commandFactory = getCliCommandFactory();
 
@@ -43,7 +44,7 @@ public class ApplicationConfigurator {
     }
 
     private CliCommandFactory getCliCommandFactory() {
-        PostgresRepositoryFactory repoFactory = new PostgresRepositoryFactory();
+        PostgresRepositoryFactory repoFactory = new PostgresRepositoryFactory(connectionManager);
         RepositoryContainer repositories = repoFactory.createAllRepositories();
 
         ServiceFactory serviceFactory = new ServiceFactory(repositories);

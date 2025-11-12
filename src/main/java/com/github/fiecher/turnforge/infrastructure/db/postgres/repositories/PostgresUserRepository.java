@@ -16,6 +16,12 @@ import java.util.Optional;
 
 public class PostgresUserRepository implements UserRepository {
 
+    private final PostgresConnectionManager connectionManager;
+
+    public PostgresUserRepository(PostgresConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+    
     private static final String INSERT_SQL =
             "INSERT INTO users (password_hash, role, login) " +
                     "VALUES (?, ?::user_role, ?) RETURNING id";
@@ -63,7 +69,7 @@ public class PostgresUserRepository implements UserRepository {
 
     @Override
     public Long save(User entity) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatementParams(pstmt, entity);
@@ -89,7 +95,7 @@ public class PostgresUserRepository implements UserRepository {
 
     @Override
     public Optional<User> findByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -109,7 +115,7 @@ public class PostgresUserRepository implements UserRepository {
     @Override
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SELECT_ALL_SQL)) {
 
@@ -128,7 +134,7 @@ public class PostgresUserRepository implements UserRepository {
             throw new IllegalArgumentException("Entity ID must not be null for update operation.");
         }
 
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL)) {
 
             setStatementParams(pstmt, entity);
@@ -146,7 +152,7 @@ public class PostgresUserRepository implements UserRepository {
 
     @Override
     public void deleteByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -159,7 +165,7 @@ public class PostgresUserRepository implements UserRepository {
 
     @Override
     public Optional<User> findByLogin(String login) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_LOGIN_SQL)) {
 
             pstmt.setString(1, login);
@@ -177,7 +183,7 @@ public class PostgresUserRepository implements UserRepository {
 
     @Override
     public void deleteByLogin(String login) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_LOGIN_SQL)) {
 
             pstmt.setString(1, login);
@@ -190,7 +196,7 @@ public class PostgresUserRepository implements UserRepository {
 
     @Override
     public boolean existByLogin(String login) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(EXIST_BY_LOGIN_SQL)) {
 
             pstmt.setString(1, login);

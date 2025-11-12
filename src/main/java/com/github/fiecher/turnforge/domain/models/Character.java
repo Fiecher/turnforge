@@ -54,6 +54,7 @@ public final class Character {
         this.charisma = 0;
         this.level = 1;
         this.money = 0;
+        this.size = SizeType.MEDIUM;
     }
 
     public Character(Long id, Long userId, String name, String class_, short level, short strength, short dexterity, short constitution, short intelligence, short wisdom, short charisma, String description, String image, String subclass, String background, String race, Integer age, SizeType size, String spellcastingAbility, int money, List<Long> skillIds, List<Long> traitIds, List<Long> abilityIds, List<Long> weaponIds, List<Long> itemIds, List<Long> armorIds) {        this(userId, name, class_);

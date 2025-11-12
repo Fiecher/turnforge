@@ -15,6 +15,12 @@ import java.util.Optional;
 
 public class PostgresTraitRepository implements TraitRepository {
 
+    private final PostgresConnectionManager connectionManager;
+
+    public PostgresTraitRepository(PostgresConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+    
     private static final String INSERT_SQL =
             "INSERT INTO traits (name, description, image, prerequisites, trait_type) " +
                     "VALUES (?, ?, ?, ?, ?) RETURNING id";
@@ -62,7 +68,7 @@ public class PostgresTraitRepository implements TraitRepository {
 
     @Override
     public Long save(Trait entity) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatementParams(pstmt, entity);
@@ -88,7 +94,7 @@ public class PostgresTraitRepository implements TraitRepository {
 
     @Override
     public Optional<Trait> findByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -107,7 +113,7 @@ public class PostgresTraitRepository implements TraitRepository {
     @Override
     public List<Trait> findAll() {
         List<Trait> traits = new ArrayList<>();
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SELECT_ALL_SQL)) {
 
@@ -126,7 +132,7 @@ public class PostgresTraitRepository implements TraitRepository {
             throw new IllegalArgumentException("Entity ID must not be null for update operation.");
         }
 
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL)) {
 
             setStatementParams(pstmt, entity);
@@ -144,7 +150,7 @@ public class PostgresTraitRepository implements TraitRepository {
 
     @Override
     public void deleteByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -157,7 +163,7 @@ public class PostgresTraitRepository implements TraitRepository {
 
     @Override
     public Optional<Trait> findByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -175,7 +181,7 @@ public class PostgresTraitRepository implements TraitRepository {
 
     @Override
     public void deleteByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -188,7 +194,7 @@ public class PostgresTraitRepository implements TraitRepository {
 
     @Override
     public boolean existsByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(EXISTS_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);

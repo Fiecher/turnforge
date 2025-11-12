@@ -16,6 +16,12 @@ import java.util.Optional;
 
 public class PostgresWeaponRepository implements WeaponRepository {
 
+    private final PostgresConnectionManager connectionManager;
+
+    public PostgresWeaponRepository(PostgresConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+    
     private static final String INSERT_SQL =
             "INSERT INTO weapons (name, description, image, damage, type, properties, weight, price) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
@@ -91,7 +97,7 @@ public class PostgresWeaponRepository implements WeaponRepository {
 
     @Override
     public Long save(Weapon entity) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatementParams(pstmt, entity);
@@ -117,7 +123,7 @@ public class PostgresWeaponRepository implements WeaponRepository {
 
     @Override
     public Optional<Weapon> findByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -137,7 +143,7 @@ public class PostgresWeaponRepository implements WeaponRepository {
     @Override
     public List<Weapon> findAll() {
         List<Weapon> weapons = new ArrayList<>();
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SELECT_ALL_SQL)) {
 
@@ -156,7 +162,7 @@ public class PostgresWeaponRepository implements WeaponRepository {
             throw new IllegalArgumentException("Entity ID must not be null for update operation.");
         }
 
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL)) {
 
             setStatementParams(pstmt, entity);
@@ -174,7 +180,7 @@ public class PostgresWeaponRepository implements WeaponRepository {
 
     @Override
     public void deleteByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -187,7 +193,7 @@ public class PostgresWeaponRepository implements WeaponRepository {
 
     @Override
     public Optional<Weapon> findByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -205,7 +211,7 @@ public class PostgresWeaponRepository implements WeaponRepository {
 
     @Override
     public void deleteByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -218,7 +224,7 @@ public class PostgresWeaponRepository implements WeaponRepository {
 
     @Override
     public boolean existsByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(EXISTS_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);

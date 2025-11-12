@@ -16,6 +16,12 @@ import java.util.Optional;
 
 public class PostgresArmorRepository implements ArmorRepository {
 
+    private final PostgresConnectionManager connectionManager;
+
+    public PostgresArmorRepository(PostgresConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+
     private static final String SELECT_FIELDS =
             "id, name, description, image, ac, armor_type, weight, price, created_at, updated_at";
 
@@ -91,7 +97,7 @@ public class PostgresArmorRepository implements ArmorRepository {
 
     @Override
     public Long save(Armor entity) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatementParams(pstmt, entity);
@@ -117,7 +123,7 @@ public class PostgresArmorRepository implements ArmorRepository {
 
     @Override
     public Optional<Armor> findByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -137,7 +143,7 @@ public class PostgresArmorRepository implements ArmorRepository {
     @Override
     public List<Armor> findAll() {
         List<Armor> armorList = new ArrayList<>();
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SELECT_ALL_SQL)) {
 
@@ -156,7 +162,7 @@ public class PostgresArmorRepository implements ArmorRepository {
         if (entity.getID() == null) {
             throw new IllegalArgumentException("Entity ID must not be null for update operation.");
         }
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL)) {
 
             setStatementParams(pstmt, entity);
@@ -174,7 +180,7 @@ public class PostgresArmorRepository implements ArmorRepository {
 
     @Override
     public void deleteByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -187,7 +193,7 @@ public class PostgresArmorRepository implements ArmorRepository {
 
     @Override
     public Optional<Armor> findByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -206,7 +212,7 @@ public class PostgresArmorRepository implements ArmorRepository {
 
     @Override
     public void deleteByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -219,7 +225,7 @@ public class PostgresArmorRepository implements ArmorRepository {
 
     @Override
     public boolean existsByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(EXISTS_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);

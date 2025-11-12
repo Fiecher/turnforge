@@ -15,6 +15,12 @@ import java.util.Optional;
 
 public class PostgresSkillRepository implements SkillRepository {
 
+    private final PostgresConnectionManager connectionManager;
+
+    public PostgresSkillRepository(PostgresConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+    
     private static final String INSERT_SQL =
             "INSERT INTO skills (name, description) VALUES (?, ?) RETURNING id";
 
@@ -54,7 +60,7 @@ public class PostgresSkillRepository implements SkillRepository {
 
     @Override
     public Long save(Skill entity) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatementParams(pstmt, entity);
@@ -80,7 +86,7 @@ public class PostgresSkillRepository implements SkillRepository {
 
     @Override
     public Optional<Skill> findByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -99,7 +105,7 @@ public class PostgresSkillRepository implements SkillRepository {
     @Override
     public List<Skill> findAll() {
         List<Skill> skills = new ArrayList<>();
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SELECT_ALL_SQL)) {
 
@@ -118,7 +124,7 @@ public class PostgresSkillRepository implements SkillRepository {
             throw new IllegalArgumentException("Entity ID must not be null for update operation.");
         }
 
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL)) {
 
             setStatementParams(pstmt, entity);
@@ -136,7 +142,7 @@ public class PostgresSkillRepository implements SkillRepository {
 
     @Override
     public void deleteByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -149,7 +155,7 @@ public class PostgresSkillRepository implements SkillRepository {
 
     @Override
     public Optional<Skill> findByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -167,7 +173,7 @@ public class PostgresSkillRepository implements SkillRepository {
 
     @Override
     public void deleteByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -180,7 +186,7 @@ public class PostgresSkillRepository implements SkillRepository {
 
     @Override
     public boolean existsByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(EXISTS_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);

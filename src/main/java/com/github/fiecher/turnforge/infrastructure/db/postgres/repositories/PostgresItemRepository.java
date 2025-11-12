@@ -16,6 +16,12 @@ import java.util.Optional;
 
 public class PostgresItemRepository implements ItemRepository {
 
+    private final PostgresConnectionManager connectionManager;
+
+    public PostgresItemRepository(PostgresConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+    
     private static final String INSERT_SQL =
             "INSERT INTO items (name, description, image, weight, price) " +
                     "VALUES (?, ?, ?, ?, ?) RETURNING id";
@@ -81,7 +87,7 @@ public class PostgresItemRepository implements ItemRepository {
 
     @Override
     public Long save(Item entity) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatementParams(pstmt, entity);
@@ -107,7 +113,7 @@ public class PostgresItemRepository implements ItemRepository {
 
     @Override
     public Optional<Item> findByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -126,7 +132,7 @@ public class PostgresItemRepository implements ItemRepository {
     @Override
     public List<Item> findAll() {
         List<Item> items = new ArrayList<>();
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SELECT_ALL_SQL)) {
 
@@ -145,7 +151,7 @@ public class PostgresItemRepository implements ItemRepository {
             throw new IllegalArgumentException("Entity ID must not be null for update operation.");
         }
 
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL)) {
 
             setStatementParams(pstmt, entity);
@@ -163,7 +169,7 @@ public class PostgresItemRepository implements ItemRepository {
 
     @Override
     public void deleteByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -176,7 +182,7 @@ public class PostgresItemRepository implements ItemRepository {
 
     @Override
     public Optional<Item> findByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -194,7 +200,7 @@ public class PostgresItemRepository implements ItemRepository {
 
     @Override
     public void deleteByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -207,7 +213,7 @@ public class PostgresItemRepository implements ItemRepository {
 
     @Override
     public boolean existsByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(EXISTS_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);

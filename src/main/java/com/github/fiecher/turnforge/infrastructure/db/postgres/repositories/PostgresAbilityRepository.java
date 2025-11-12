@@ -15,6 +15,12 @@ import java.util.Optional;
 
 public class PostgresAbilityRepository implements AbilityRepository {
 
+    private final PostgresConnectionManager connectionManager;
+
+    public PostgresAbilityRepository(PostgresConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+
     private static final String INSERT_SQL =
             "INSERT INTO abilities (name, description, image, damage, ability_type, level, time, range, components, duration) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
@@ -74,7 +80,7 @@ public class PostgresAbilityRepository implements AbilityRepository {
 
     @Override
     public Long save(Ability entity) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatementParams(pstmt, entity);
@@ -101,7 +107,7 @@ public class PostgresAbilityRepository implements AbilityRepository {
 
     @Override
     public Optional<Ability> findByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -122,7 +128,7 @@ public class PostgresAbilityRepository implements AbilityRepository {
     @Override
     public List<Ability> findAll() {
         List<Ability> abilities = new ArrayList<>();
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SELECT_ALL_SQL)) {
 
@@ -142,7 +148,7 @@ public class PostgresAbilityRepository implements AbilityRepository {
             throw new IllegalArgumentException("Entity ID must not be null for update operation.");
         }
 
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL)) {
 
             setStatementParams(pstmt, entity);
@@ -161,7 +167,7 @@ public class PostgresAbilityRepository implements AbilityRepository {
 
     @Override
     public void deleteByID(Long entityID) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_ID_SQL)) {
 
             pstmt.setLong(1, entityID);
@@ -174,7 +180,7 @@ public class PostgresAbilityRepository implements AbilityRepository {
 
     @Override
     public Optional<Ability> findByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -193,7 +199,7 @@ public class PostgresAbilityRepository implements AbilityRepository {
 
     @Override
     public void deleteByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(DELETE_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
@@ -206,7 +212,7 @@ public class PostgresAbilityRepository implements AbilityRepository {
 
     @Override
     public boolean existsByName(String name) {
-        try (Connection conn = PostgresConnectionManager.getConnection();
+        try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(EXISTS_BY_NAME_SQL)) {
 
             pstmt.setString(1, name);
