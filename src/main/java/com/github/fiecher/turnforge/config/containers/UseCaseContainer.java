@@ -1,33 +1,21 @@
 package com.github.fiecher.turnforge.config.containers;
 
-import com.github.fiecher.turnforge.app.usecase.*;
+import com.github.fiecher.turnforge.app.usecase.CreateCharacterUseCase;
+import com.github.fiecher.turnforge.app.usecase.CreateUserUseCase;
+import com.github.fiecher.turnforge.app.usecase.GetCharactersUseCase;
+import com.github.fiecher.turnforge.app.usecase.LoginUserUseCase;
+import com.github.fiecher.turnforge.app.usecase.ability.CreateAbilityUseCase;
+import com.github.fiecher.turnforge.app.usecase.ability.DeleteAbilityUseCase;
+import com.github.fiecher.turnforge.app.usecase.ability.GetAbilityUseCase;
+import com.github.fiecher.turnforge.app.usecase.ability.UpdateAbilityUseCase;
 
-public class UseCaseContainer {
-    private final CreateUserUseCase createUserUseCase;
-    private final LoginUserUseCase loginUserUseCase;
-    private final CreateCharacterUseCase createCharacterUseCase;
-    private final GetCharactersUseCase getCharactersUseCase;
-
-    public UseCaseContainer(CreateUserUseCase createUserUseCase, LoginUserUseCase loginUserUseCase, CreateCharacterUseCase createCharacterUseCase, GetCharactersUseCase getCharactersUseCase) {
-        this.createUserUseCase = createUserUseCase;
-        this.loginUserUseCase = loginUserUseCase;
-        this.createCharacterUseCase = createCharacterUseCase;
-        this.getCharactersUseCase = getCharactersUseCase;
-    }
-
-    public CreateUserUseCase getCreateUserUseCase() {
-        return createUserUseCase;
-    }
-
-    public LoginUserUseCase getLoginUserUseCase() {
-        return loginUserUseCase;
-    }
-
-    public CreateCharacterUseCase getCreateCharacterUseCase() {
-        return createCharacterUseCase;
-    }
-
-    public GetCharactersUseCase getGetCharactersUseCase() {
-        return getCharactersUseCase;
-    }
+public record UseCaseContainer(
+        CreateUserUseCase createUserUseCase,
+        LoginUserUseCase loginUserUseCase,
+        CreateCharacterUseCase createCharacterUseCase,
+        GetCharactersUseCase getCharactersUseCase,
+        CreateAbilityUseCase createAbilityUseCase,
+        GetAbilityUseCase getAbilityUseCase,
+        UpdateAbilityUseCase updateAbilityUseCase,
+        DeleteAbilityUseCase deleteAbilityUseCase) {
 }

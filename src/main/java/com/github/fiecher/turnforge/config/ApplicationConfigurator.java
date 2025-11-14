@@ -1,10 +1,12 @@
 package com.github.fiecher.turnforge.config;
 
 import com.github.fiecher.turnforge.config.containers.RepositoryContainer;
+import com.github.fiecher.turnforge.config.containers.ServletContainer;
 import com.github.fiecher.turnforge.config.containers.ServiceContainer;
 import com.github.fiecher.turnforge.config.containers.UseCaseContainer;
 import com.github.fiecher.turnforge.config.factories.CliCommandFactory;
 import com.github.fiecher.turnforge.config.factories.PostgresRepositoryFactory;
+import com.github.fiecher.turnforge.config.factories.ServletFactory;
 import com.github.fiecher.turnforge.config.factories.ServiceFactory;
 import com.github.fiecher.turnforge.config.factories.UseCaseFactory;
 import com.github.fiecher.turnforge.domain.services.PasswordGenerator;
@@ -27,9 +29,9 @@ public class ApplicationConfigurator {
         this.reader = new InputReader();
     }
 
-    public Menu configureAndBuildMenu(String salt, String URL, String USER, String PASSWORD, String DRIVER) {
+    public Menu configureAndBuildMenu(String salt, String url, String user, String password, String driver) {
         PasswordGenerator.init(salt);
-        connectionManager = PostgresConnectionManager.init(URL, USER, PASSWORD, DRIVER);
+        connectionManager = PostgresConnectionManager.init(url, user, password, driver);
 
         CliCommandFactory commandFactory = getCliCommandFactory();
 
@@ -41,6 +43,23 @@ public class ApplicationConfigurator {
         menu.registerCommand(commandFactory.createGetCharactersCommand(), false);
 
         return menu;
+    }
+
+    public ServletContainer configureAndBuildServlets(String salt, String URL, String USER, String PASSWORD, String DRIVER) {
+        PasswordGenerator.init(salt);
+        connectionManager = PostgresConnectionManager.init(URL, USER, PASSWORD, DRIVER);
+
+        PostgresRepositoryFactory repoFactory = new PostgresRepositoryFactory(connectionManager);
+        RepositoryContainer repositories = repoFactory.createAllRepositories();
+
+        ServiceFactory serviceFactory = new ServiceFactory(repositories);
+        ServiceContainer services = serviceFactory.createAllServices();
+
+        UseCaseFactory useCaseFactory = new UseCaseFactory(repositories, services);
+        UseCaseContainer useCases = useCaseFactory.createAllUseCases();
+
+        ServletFactory servletFactory = new ServletFactory(useCases);
+        return servletFactory.createAllServlets();
     }
 
     private CliCommandFactory getCliCommandFactory() {
