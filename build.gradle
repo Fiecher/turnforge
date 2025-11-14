@@ -13,6 +13,8 @@ repositories {
 
 ext {
     junitVersion = '5.10.0'
+    jakartaServletVersion = '6.0.0'
+    jakartaJsonbVersion = '3.0.0'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -25,7 +27,11 @@ application {
 }
 
 dependencies {
-
+    implementation("org.postgresql:postgresql:42.7.3")
+    implementation("jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}")
+    implementation("jakarta.json.bind:jakarta.json.bind-api:${jakartaJsonbVersion}")
+    implementation("org.eclipse:yasson:3.0.4")
+    implementation("org.eclipse.parsson:parsson:1.1.6")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
