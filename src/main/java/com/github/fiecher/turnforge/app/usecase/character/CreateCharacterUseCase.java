@@ -1,7 +1,8 @@
-package com.github.fiecher.turnforge.app.usecase;
+package com.github.fiecher.turnforge.app.usecase.character;
 
 import com.github.fiecher.turnforge.app.dtos.responses.CharacterCreationResponse;
 import com.github.fiecher.turnforge.app.dtos.requests.CreateCharacterRequest;
+import com.github.fiecher.turnforge.app.usecase.UseCase;
 import com.github.fiecher.turnforge.domain.services.CharacterService;
 
 import java.util.Objects;
@@ -17,7 +18,7 @@ public class CreateCharacterUseCase implements UseCase<CreateCharacterRequest, C
     @Override
     public CharacterCreationResponse execute(CreateCharacterRequest input) {
         Long newID = characterService.createNewCharacter(
-                input.userID(),
+                input.userId(),
                 input.name(),
                 input.characterClass()
         );
