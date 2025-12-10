@@ -1,24 +1,15 @@
-package com.github.fiecher.turnforge.app.usecase;
+package com.github.fiecher.turnforge.app.usecase.character;
 
-import com.github.fiecher.turnforge.app.dtos.responses.CharacterDetails;
 import com.github.fiecher.turnforge.app.dtos.requests.GetCharactersRequest;
+import com.github.fiecher.turnforge.app.dtos.responses.CharacterDetails;
 import com.github.fiecher.turnforge.app.dtos.responses.GetCharactersResponse;
-import com.github.fiecher.turnforge.domain.models.Ability;
-import com.github.fiecher.turnforge.domain.models.Skill;
-import com.github.fiecher.turnforge.domain.models.Armor;
-import com.github.fiecher.turnforge.domain.models.Weapon;
-import com.github.fiecher.turnforge.domain.models.Item;
+import com.github.fiecher.turnforge.app.usecase.UseCase;
+import com.github.fiecher.turnforge.domain.models.*;
 import com.github.fiecher.turnforge.domain.models.Character;
-import com.github.fiecher.turnforge.domain.repositories.AbilityRepository;
-import com.github.fiecher.turnforge.domain.repositories.CharacterRepository;
-import com.github.fiecher.turnforge.domain.repositories.SkillRepository;
-import com.github.fiecher.turnforge.domain.repositories.WeaponRepository;
-import com.github.fiecher.turnforge.domain.repositories.ArmorRepository;
-import com.github.fiecher.turnforge.domain.repositories.ItemRepository;
+import com.github.fiecher.turnforge.domain.repositories.*;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GetCharactersUseCase implements UseCase<GetCharactersRequest, GetCharactersResponse> {
@@ -29,6 +20,7 @@ public class GetCharactersUseCase implements UseCase<GetCharactersRequest, GetCh
     private final WeaponRepository weaponRepository;
     private final ArmorRepository armorRepository;
     private final ItemRepository itemRepository;
+    private final TraitRepository traitRepository;
 
     public GetCharactersUseCase(
             CharacterRepository characterRepository,
@@ -36,7 +28,8 @@ public class GetCharactersUseCase implements UseCase<GetCharactersRequest, GetCh
             SkillRepository skillRepository,
             WeaponRepository weaponRepository,
             ArmorRepository armorRepository,
-            ItemRepository itemRepository) {
+            ItemRepository itemRepository,
+            TraitRepository traitRepository) {
 
         this.characterRepository = Objects.requireNonNull(characterRepository);
         this.abilityRepository = Objects.requireNonNull(abilityRepository);
@@ -44,6 +37,7 @@ public class GetCharactersUseCase implements UseCase<GetCharactersRequest, GetCh
         this.weaponRepository = Objects.requireNonNull(weaponRepository);
         this.armorRepository = Objects.requireNonNull(armorRepository);
         this.itemRepository = Objects.requireNonNull(itemRepository);
+        this.traitRepository = Objects.requireNonNull(traitRepository);
     }
 
     @Override
@@ -59,41 +53,35 @@ public class GetCharactersUseCase implements UseCase<GetCharactersRequest, GetCh
 
 
     private CharacterDetails mapToDetails(Character character) {
-        List<String> abilityNames = character.getAbilityIDs().stream()
-                .map(abilityRepository::findByID)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        List<String> abilityNames = abilityRepository.findAllByCharacterID(character.getID())
+                .stream()
                 .map(Ability::getName)
                 .collect(Collectors.toList());
 
-        List<String> skillNames = character.getSkillIDs().stream()
-                .map(skillRepository::findByID)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        List<String> skillNames = skillRepository.findAllByCharacterID(character.getID())
+                .stream()
                 .map(Skill::getName)
                 .collect(Collectors.toList());
 
-        List<String> weaponNames = character.getWeaponIDs().stream()
-                .map(weaponRepository::findByID)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        List<String> weaponNames = weaponRepository.findAllByCharacterID(character.getID())
+                .stream()
                 .map(Weapon::getName)
                 .collect(Collectors.toList());
 
-        List<String> armorNames = character.getArmorIDs().stream()
-                .map(armorRepository::findByID)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        List<String> armorNames = armorRepository.findAllByCharacterID(character.getID())
+                .stream()
                 .map(Armor::getName)
                 .collect(Collectors.toList());
 
-        List<String> itemNames = character.getItemIDs().stream()
-                .map(itemRepository::findByID)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        List<String> itemNames = itemRepository.findAllByCharacterID(character.getID())
+                .stream()
                 .map(Item::getName)
                 .collect(Collectors.toList());
 
+        List<String> traitNames = traitRepository.findAllByCharacterID(character.getID())
+                .stream()
+                .map(Trait::getName)
+                .collect(Collectors.toList());
 
         return new CharacterDetails(
                 character.getID(),
@@ -112,11 +100,21 @@ public class GetCharactersUseCase implements UseCase<GetCharactersRequest, GetCh
                 character.getImage(),
                 character.getRace(),
 
+                character.getSubclass(),
+                character.getBackground(),
+                character.getAge(),
+                character.getSize().name(),
+                character.getSpellcastingAbility(),
+                character.getMoney(),
+
                 abilityNames,
                 skillNames,
                 weaponNames,
                 armorNames,
-                itemNames
+                itemNames,
+                traitNames
         );
     }
+
+
 }
