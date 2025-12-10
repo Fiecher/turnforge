@@ -14,6 +14,8 @@ import com.github.fiecher.turnforge.presentation.cli.Menu;
 import com.github.fiecher.turnforge.presentation.cli.input.InputReader;
 import com.github.fiecher.turnforge.presentation.cli.output.View;
 
+import java.sql.SQLException;
+
 public class ApplicationConfigurator {
 
     private final ApplicationContext applicationContext;
@@ -54,5 +56,11 @@ public class ApplicationConfigurator {
         UseCaseContainer useCases = useCaseFactory.createAllUseCases();
 
         return new CliCommandFactory(useCases, applicationContext, view, reader);
+    }
+
+    public void closeConnection() throws SQLException {
+        if (connectionManager != null) {
+            connectionManager.getConnection().close();
+        }
     }
 }

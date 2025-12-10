@@ -4,7 +4,7 @@ import com.github.fiecher.turnforge.app.dtos.responses.CharacterDetails;
 import com.github.fiecher.turnforge.app.dtos.requests.GetCharactersRequest;
 import com.github.fiecher.turnforge.app.dtos.responses.GetCharactersResponse;
 import com.github.fiecher.turnforge.app.dtos.responses.UserDetails;
-import com.github.fiecher.turnforge.app.usecase.GetCharactersUseCase;
+import com.github.fiecher.turnforge.app.usecase.character.GetCharactersUseCase;
 import com.github.fiecher.turnforge.presentation.cli.ApplicationContext;
 import com.github.fiecher.turnforge.presentation.cli.commands.Command;
 import com.github.fiecher.turnforge.presentation.cli.output.View;
