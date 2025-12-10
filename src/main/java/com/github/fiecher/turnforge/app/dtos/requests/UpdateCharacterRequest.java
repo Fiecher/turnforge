@@ -1,15 +1,18 @@
 package com.github.fiecher.turnforge.app.dtos.requests;
 
+import com.github.fiecher.turnforge.domain.models.SizeType;
+
 import java.util.List;
 
-public record CreateCharacterRequest(
-        Long userId,
+
+public record UpdateCharacterRequest(
+        Long characterID,
         String name,
         String characterClass,
         Integer level,
         String race,
         Integer age,
-        String size,
+        SizeType size,
         String subclass,
         String background,
         String description,
@@ -26,6 +29,6 @@ public record CreateCharacterRequest(
         List<Long> items,
         List<Long> traits,
         List<Long> abilities,
-        String custom_skills
+        List<Long> custom_skills
 ) {
 }

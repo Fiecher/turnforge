@@ -1,5 +1,7 @@
 module com.github.fiecher.turnforge {
     requires java.sql;
+    requires jakarta.json.bind;
+    requires jakarta.servlet;
     exports com.github.fiecher.turnforge;
     exports com.github.fiecher.turnforge.config;
     exports com.github.fiecher.turnforge.presentation.cli.input;
