@@ -1,20 +1,11 @@
 package com.github.fiecher.turnforge.domain.services;
 
 
-import com.github.fiecher.turnforge.domain.models.Ability;
+import com.github.fiecher.turnforge.app.dtos.requests.UpdateCharacterRequest;
+import com.github.fiecher.turnforge.domain.models.*;
 import com.github.fiecher.turnforge.domain.models.Character;
-import com.github.fiecher.turnforge.domain.models.Weapon;
-import com.github.fiecher.turnforge.domain.models.Armor;
-import com.github.fiecher.turnforge.domain.models.Trait;
-import com.github.fiecher.turnforge.domain.models.Skill;
-import com.github.fiecher.turnforge.domain.models.Item;
-import com.github.fiecher.turnforge.domain.repositories.AbilityRepository;
-import com.github.fiecher.turnforge.domain.repositories.ArmorRepository;
-import com.github.fiecher.turnforge.domain.repositories.CharacterRepository;
-import com.github.fiecher.turnforge.domain.repositories.WeaponRepository;
-import com.github.fiecher.turnforge.domain.repositories.ItemRepository;
-import com.github.fiecher.turnforge.domain.repositories.TraitRepository;
-import com.github.fiecher.turnforge.domain.repositories.SkillRepository;
+import com.github.fiecher.turnforge.domain.repositories.*;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -63,22 +54,50 @@ public class CharacterService {
         return characterRepository.findAllByUserID(userId);
     }
 
-    public Character updateCharacterStats(Long characterID, Short strength, Short dexterity, Short constitution, Short intelligence, Short wisdom, Short charisma) {
-        Optional<Character> characterOptional = characterRepository.findByID(characterID);
-        if (characterOptional.isEmpty()) {
-            throw new IllegalArgumentException("Character not found for ID: " + characterID);
+    public void updateCharacter(UpdateCharacterRequest request, Long userId) {
+        if (request.characterID() == null) {
+            throw new IllegalArgumentException("Character ID cannot be null.");
         }
 
-        Character character = characterOptional.get();
-        if (strength != null) character.setStrength(strength);
-        if (dexterity != null) character.setDexterity(dexterity);
-        if (constitution != null) character.setConstitution(constitution);
-        if (intelligence != null) character.setIntelligence(intelligence);
-        if (wisdom != null) character.setWisdom(wisdom);
-        if (charisma != null) character.setCharisma(charisma);
+        Optional<Character> existingCharacter = characterRepository.findByID(request.characterID());
 
-        return characterRepository.update(character);
+        if (existingCharacter.isEmpty()) {
+            throw new IllegalArgumentException("Character not found for ID: " + request.characterID());
+        }
+
+        if (!Objects.equals(existingCharacter.get().getUserID(), userId)) {
+            throw new SecurityException("Access denied: Character does not belong to the authenticated user.");
+        }
+
+        if (request.name() == null || request.name().trim().isEmpty()) {
+            throw new IllegalArgumentException("Character name cannot be empty.");
+        }
+        if (request.characterClass() == null || request.characterClass().trim().isEmpty()) {
+            throw new IllegalArgumentException("Character class cannot be empty.");
+        }
+
+        validateEntityList(request.weapons(), weaponRepository, "Weapon");
+        validateEntityList(request.armor(), armorRepository, "Armor");
+        validateEntityList(request.items(), itemRepository, "Item");
+        validateEntityList(request.traits(), traitRepository, "Trait");
+        validateEntityList(request.abilities(), abilityRepository, "Ability");
+
+        characterRepository.updateFullCharacter(request);
     }
+
+    private void validateEntityList(List<Long> ids, Repository repository, String entityName) {
+        if (ids == null) return;
+        for (Long id : ids) {
+            if (id == null) {
+                System.err.println(entityName + " id list contains null, skipping validation.");
+                continue;
+            }
+            if (repository.findByID(id).isEmpty()) {
+                throw new IllegalArgumentException(entityName + " ID " + id + " not found in the database.");
+            }
+        }
+    }
+
 
     public Character addAbilityToCharacter(Long characterID, Long abilityID) {
         Optional<Character> characterOptional = characterRepository.findByID(characterID);

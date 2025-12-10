@@ -37,11 +37,6 @@ public class CreateCharacterCommand implements Command {
             view.showMessage("\n --- Creating Character ---");
             String name = reader.readLine("Enter name: ");
             String characterClass = reader.readLine("Enter class: ");
-//            CharacterCreationResponse characterID = createCharacterUseCase.execute(
-//                    new CreateCharacterRequest(userID, name, characterClass)
-//            );
-
-//            view.showSuccess("Character '" + name + "' created successfully with ID: " + characterID.characterID());
 
         } catch (Exception e) {
             view.showError("Creating character failed:" + e.getMessage());

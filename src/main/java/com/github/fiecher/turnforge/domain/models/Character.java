@@ -21,7 +21,7 @@ public final class Character {
     private String subclass;
     private String background;
     private String race;
-    private int age;
+    private Integer age;
     private SizeType size;
     private String spellcastingAbility;
     private int money;
@@ -213,7 +213,6 @@ public final class Character {
     public void setAge(Integer age) {
         this.age = age != null && age >= 0 ? age : null;
     }
-
     public SizeType getSize() {
         return size;
     }

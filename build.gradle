@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'war'
     id 'application'
     id 'org.javamodularity.moduleplugin' version '1.8.12'
 }
@@ -25,11 +26,19 @@ application {
 }
 
 dependencies {
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    implementation("jakarta.json.bind:jakarta.json.bind-api:3.0.0")
+    implementation("org.eclipse:yasson:3.0.3")
+    implementation("org.postgresql:postgresql:42.7.3")
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
-    implementation("org.postgresql:postgresql:42.7.3")
 }
 
 test {
     useJUnitPlatform()
+}
+
+war {
+    archiveFileName = "${rootProject.name}.war"
 }

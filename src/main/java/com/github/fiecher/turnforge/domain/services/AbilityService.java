@@ -15,16 +15,31 @@ public class AbilityService {
         this.abilityRepository = Objects.requireNonNull(abilityRepository);
     }
 
-    public Long createAbility(String name, String damage) {
-        if (name == null || name.trim().isEmpty()) throw new IllegalArgumentException("Ability name cannot be empty.");
-        if (damage == null || damage.trim().isEmpty()) throw new IllegalArgumentException("Ability damage cannot be empty.");
-
-        if (abilityRepository.existsByName(name)) {
-            throw new IllegalStateException("Ability with name " + name + " already exists.");
+    public Long createAbility(Ability ability) {
+        Objects.requireNonNull(ability, "Ability cannot be null.");
+        validateAbilityData(ability);
+        if (abilityRepository.existsByName(ability.getName())) {
+            throw new IllegalStateException("Ability with name '" + ability.getName() + "' already exists.");
         }
 
-        Ability ability = new Ability(name, damage);
         return abilityRepository.save(ability);
+    }
+
+    public Ability updateAbility(Ability ability) {
+        Objects.requireNonNull(ability, "Ability cannot be null.");
+
+        if (ability.getID() == null) {
+            throw new IllegalArgumentException("Ability ID must be set for update.");
+        }
+
+        validateAbilityData(ability);
+
+        Optional<Ability> existingAbility = abilityRepository.findByName(ability.getName());
+        if (existingAbility.isPresent() && !Objects.equals(existingAbility.get().getID(), ability.getID())) {
+            throw new IllegalStateException("Ability with name '" + ability.getName() + "' already exists.");
+        }
+
+        return abilityRepository.update(ability);
     }
 
     public Optional<Ability> getAbilityByID(Long abilityID) {
@@ -41,20 +56,22 @@ public class AbilityService {
         return abilityRepository.findAll();
     }
 
-    public Ability updateAbility(Ability ability) {
-        Objects.requireNonNull(ability, "Ability cannot be null.");
-        if (ability.getID() == null) throw new IllegalArgumentException("Ability ID must be set for update.");
-
-        Optional<Ability> existingAbility = abilityRepository.findByName(ability.getName());
-        if (existingAbility.isPresent() && !Objects.equals(existingAbility.get().getID(), ability.getID())) {
-            throw new IllegalStateException("Ability with name " + ability.getName() + " already exists.");
-        }
-
-        return abilityRepository.update(ability);
-    }
-
     public void deleteAbilityByID(Long abilityID) {
         if (abilityID == null) return;
         abilityRepository.deleteByID(abilityID);
+    }
+
+    private void validateAbilityData(Ability ability) {
+        if (ability.getName() == null || ability.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Ability name cannot be empty.");
+        }
+
+        if (ability.getDamage() == null || ability.getDamage().trim().isEmpty()) {
+            throw new IllegalArgumentException("Ability damage cannot be empty.");
+        }
+
+        if (ability.getLevel() < 0) {
+            throw new IllegalArgumentException("Ability level cannot be negative.");
+        }
     }
 }
