@@ -27,7 +27,7 @@ public class PostgresArmorRepository implements ArmorRepository {
 
     private static final String INSERT_SQL =
             "INSERT INTO armor (name, description, image, ac, armor_type, weight, price) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SELECT_BY_ID_SQL =
             "SELECT " + SELECT_FIELDS + " FROM armor WHERE id = ?";
@@ -102,7 +102,8 @@ public class PostgresArmorRepository implements ArmorRepository {
 
             setStatementParams(pstmt, entity);
 
-            if (pstmt.executeUpdate() == 0) {
+            int affected = pstmt.executeUpdate();
+            if (affected == 0) {
                 throw new SQLException("Saving armor failed, no rows affected.");
             }
 
@@ -237,5 +238,31 @@ public class PostgresArmorRepository implements ArmorRepository {
             throw new RuntimeException("Database error during existsByName operation.", e);
         }
     }
+
+    @Override
+    public List<Armor> findAllByCharacterID(Long characterID) {
+        final String SQL =
+                "SELECT a.id, a.name, a.description, a.image, a.ac, a.armor_type, a.weight, a.price, a.created_at, a.updated_at " +
+                        "FROM armor a " +
+                        "JOIN characters_armor ca ON a.id = ca.armor_id " +
+                        "WHERE ca.character_id = ?";
+
+        List<Armor> result = new ArrayList<>();
+        try (Connection conn = connectionManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setLong(1, characterID);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(mapResultSetToArmor(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("DB error fetching armor for character " + characterID, e);
+        }
+        return result;
+    }
+
 }
 

@@ -151,8 +151,19 @@ public class PostgresAbilityRepository implements AbilityRepository {
         try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE_SQL)) {
 
-            setStatementParams(pstmt, entity);
-            pstmt.setLong(11, entity.getID());
+            int i = 1;
+            pstmt.setString(i++, entity.getName());
+            pstmt.setString(i++, entity.getDescription());
+            pstmt.setString(i++, entity.getImage());
+            pstmt.setString(i++, entity.getDamage());
+            pstmt.setString(i++, entity.getType());
+            pstmt.setInt(i++, entity.getLevel());
+            pstmt.setString(i++, entity.getTime());
+            pstmt.setString(i++, entity.getRange());
+            pstmt.setString(i++, entity.getComponents());
+            pstmt.setString(i++, entity.getDuration());
+
+            pstmt.setLong(i, entity.getID());
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows == 0) {
@@ -227,4 +238,26 @@ public class PostgresAbilityRepository implements AbilityRepository {
             throw new RuntimeException("Database error during existsByName operation.", e);
         }
     }
+
+    @Override
+    public List<Ability> findAllByCharacterID(Long characterID) {
+        final String SQL =
+                "SELECT a.* FROM abilities a " +
+                        "JOIN characters_abilities ca ON a.id = ca.ability_id " +
+                        "WHERE ca.character_id = ?";
+
+        List<Ability> res = new ArrayList<>();
+        try (Connection conn = connectionManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setLong(1, characterID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) res.add(mapResultSetToAbility(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return res;
+    }
+
 }

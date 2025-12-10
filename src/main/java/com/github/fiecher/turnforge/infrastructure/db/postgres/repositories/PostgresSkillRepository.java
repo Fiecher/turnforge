@@ -198,4 +198,9 @@ public class PostgresSkillRepository implements SkillRepository {
             throw new RuntimeException("Database error during existsByName operation.", e);
         }
     }
+
+    @Override
+    public List<Skill> findAllByCharacterID(Long characterID) {
+        return List.of();
+    }
 }

@@ -1,5 +1,6 @@
 package com.github.fiecher.turnforge.infrastructure.db.inmemory;
 
+import com.github.fiecher.turnforge.app.dtos.requests.UpdateCharacterRequest;
 import com.github.fiecher.turnforge.domain.models.Character;
 import com.github.fiecher.turnforge.domain.repositories.CharacterRepository;
 
@@ -101,5 +102,10 @@ public class InMemoryCharacterRepository implements CharacterRepository {
         if (userId == null || name == null || name.trim().isEmpty()) return false;
         String key = generateUniqueKey(userId, name);
         return charactersByUniqueKey.containsKey(key);
+    }
+
+    @Override
+    public void updateFullCharacter(UpdateCharacterRequest request){
+
     }
 }

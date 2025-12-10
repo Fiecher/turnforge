@@ -62,7 +62,7 @@ public class PostgresTraitRepository implements TraitRepository {
         pstmt.setString(i++, entity.getDescription());
         pstmt.setString(i++, entity.getImage());
         pstmt.setString(i++, entity.getPrerequisites());
-        pstmt.setString(i, entity.getType());
+        pstmt.setString(i, entity.getTrait_type());
     }
 
 
@@ -206,5 +206,31 @@ public class PostgresTraitRepository implements TraitRepository {
             throw new RuntimeException("Database error during existsByName operation.", e);
         }
     }
+
+    @Override
+    public List<Trait> findAllByCharacterID(Long characterID) {
+        final String SQL =
+                "SELECT t.id, t.name, t.description, t.image, t.prerequisites, t.trait_type, t.created_at, t.updated_at " +
+                        "FROM traits t " +
+                        "JOIN characters_traits ct ON t.id = ct.trait_id " +
+                        "WHERE ct.character_id = ?";
+
+        List<Trait> result = new ArrayList<>();
+        try (Connection conn = connectionManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setLong(1, characterID);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(mapResultSetToTrait(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("DB error fetching traits for character " + characterID, e);
+        }
+        return result;
+    }
+
 }
 

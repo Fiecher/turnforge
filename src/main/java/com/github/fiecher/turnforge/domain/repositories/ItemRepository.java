@@ -2,6 +2,7 @@ package com.github.fiecher.turnforge.domain.repositories;
 
 import com.github.fiecher.turnforge.domain.models.Item;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ItemRepository extends Repository<Item, Long> {
@@ -11,4 +12,6 @@ public interface ItemRepository extends Repository<Item, Long> {
     void deleteByName(String name);
 
     boolean existsByName(String name);
+
+    List<Item> findAllByCharacterID(Long characterID);
 }

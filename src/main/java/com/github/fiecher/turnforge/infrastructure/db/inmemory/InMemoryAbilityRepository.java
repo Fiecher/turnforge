@@ -87,4 +87,9 @@ public class InMemoryAbilityRepository implements AbilityRepository {
     public boolean existsByName(String name) {
         return abilitiesByName.containsKey(name);
     }
+
+    @Override
+    public List<Ability> findAllByCharacterID(Long characterID) {
+        return List.of();
+    }
 }

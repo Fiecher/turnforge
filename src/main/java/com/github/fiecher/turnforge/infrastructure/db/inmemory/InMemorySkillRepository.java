@@ -88,4 +88,9 @@ public class InMemorySkillRepository implements SkillRepository {
     public boolean existsByName(String name) {
         return skillsByName.containsKey(name);
     }
+
+    @Override
+    public List<Skill> findAllByCharacterID(Long characterID) {
+        return List.of();
+    }
 }
