@@ -186,6 +186,15 @@ const app = createApp({
                 fetchItems(),
                 fetchTraits()
             ])
+
+            // <- вставить сюда:
+            window.__globalEntityLists = {
+                weapons: weapons.value,
+                armor: armor.value,
+                items: items.value,
+                traits: traits.value,
+                abilities: abilities.value
+            };
         }
 
         const crudMethods = ['Ability', 'Weapon', 'Armor', 'Item', 'Trait']

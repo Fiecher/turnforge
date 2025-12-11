@@ -20,8 +20,6 @@ const sizes = ref([
   { label: 'Gargantuan', value: 'GARGANTUAN' }
 ])
 
-
-
 const loading = ref(false)
 const crudRef = ref(null)
 
@@ -38,7 +36,132 @@ const headers = [
 const classOptions = ref(['Воин', 'Маг', 'Плут', 'Жрец', 'Бард'])
 const abilityNames = ref(['Strength', 'Dexterity', 'Constitution', 'Intelligence', 'Wisdom', 'Charisma'])
 
-/
+function readId(obj) {
+  if (!obj) return null
+  if (typeof obj === 'number') return obj
+  if (typeof obj === 'string' && /^\d+$/.test(obj)) return Number(obj)
+  if (typeof obj === 'object') {
+    if ('id' in obj && (typeof obj.id === 'number' || (typeof obj.id === 'string' && /^\d+$/.test(obj.id)))) {
+      return Number(obj.id)
+    }
+    if ('ID' in obj && (typeof obj.ID === 'number' || (typeof obj.ID === 'string' && /^\d+$/.test(obj.ID)))) {
+      return Number(obj.ID)
+    }
+  }
+  return null
+}
+
+function readName(obj) {
+  if (!obj) return null
+  if (typeof obj === 'string') return obj
+  if (typeof obj === 'object') {
+    if ('name' in obj && obj.name) return String(obj.name)
+    if ('Name' in obj && obj.Name) return String(obj.Name)
+    if ('title' in obj && obj.title) return String(obj.title)
+    if ('Title' in obj && obj.Title) return String(obj.Title)
+  }
+  return null
+}
+
+
+function convertFieldToIds(character, list, fieldName) {
+  const raw = character[fieldName]
+
+  if (!raw) {
+
+    character[fieldName] = []
+    return
+  }
+
+  const nameToId = new Map()
+  for (const e of (list || [])) {
+    const nm = readName(e)
+    const id = readId(e)
+    if (nm && id != null) nameToId.set(String(nm), Number(id))
+  }
+
+  const ids = []
+
+  if (Array.isArray(raw)) {
+    for (const v of raw) {
+      const maybeId = readId(v)
+      if (maybeId != null) {
+        ids.push(Number(maybeId))
+        continue
+      }
+
+      if (typeof v === 'string') {
+        const trimmed = v.trim()
+        if (/^\d+$/.test(trimmed)) {
+          ids.push(Number(trimmed))
+          continue
+        }
+
+        const mapped = nameToId.get(trimmed)
+        if (mapped != null) {
+          ids.push(Number(mapped))
+          continue
+        }
+
+        continue
+      }
+    }
+  } else {
+    const maybeId = readId(raw)
+    if (maybeId != null) ids.push(Number(maybeId))
+    else if (typeof raw === 'string') {
+      const mapped = nameToId.get(raw.trim())
+      if (mapped != null) ids.push(Number(mapped))
+    }
+  }
+
+
+  character[fieldName] = Array.from(new Set(ids.map(Number)))
+}
+
+function normalizeCharacterRelations(character) {
+  convertFieldToIds(character, weaponsList.value, 'weapons')
+  convertFieldToIds(character, armorList.value, 'armor')
+  convertFieldToIds(character, itemsList.value, 'items')
+  convertFieldToIds(character, traitsList.value, 'traits')
+  convertFieldToIds(character, abilitiesList.value, 'abilities')
+
+  if (!character.custom_skills) {
+    character.custom_skills = []
+  } else {
+    const cs = []
+    for (const v of character.custom_skills) {
+      const maybeId = readId(v)
+      if (maybeId != null) cs.push(Number(maybeId))
+      else if (typeof v === 'string' && /^\d+$/.test(v.trim())) cs.push(Number(v.trim()))
+    }
+    character.custom_skills = Array.from(new Set(cs))
+  }
+}
+
+function serializeCharacterForSend(char) {
+  const safe = { ...char }
+  const toNumArray = (arr) => {
+    if (!arr) return []
+    if (!Array.isArray(arr)) return []
+    return arr.map(v => {
+      const n = readId(v)
+      if (n != null) return Number(n)
+      if (typeof v === 'string' && /^\d+$/.test(v.trim())) return Number(v.trim())
+      return null
+    }).filter(x => x !== null)
+  }
+
+  safe.weapons = toNumArray(char.weapons)
+  safe.armor = toNumArray(char.armor)
+  safe.items = toNumArray(char.items)
+  safe.traits = toNumArray(char.traits)
+  safe.abilities = toNumArray(char.abilities)
+  safe.custom_skills = toNumArray(char.custom_skills)
+
+  return safe
+}
+
 async function fetchAllRelatedData() {
   try {
     abilitiesList.value = await api.getAbilitiesList()
@@ -46,41 +169,73 @@ async function fetchAllRelatedData() {
     weaponsList.value = await api.getWeaponsList()
     armorList.value = await api.getArmorList()
     itemsList.value = await api.getItemsList()
+
+    abilitiesList.value = Array.isArray(abilitiesList.value) ? abilitiesList.value : []
+    traitsList.value = Array.isArray(traitsList.value) ? traitsList.value : []
+    weaponsList.value = Array.isArray(weaponsList.value) ? weaponsList.value : []
+    armorList.value = Array.isArray(armorList.value) ? armorList.value : []
+    itemsList.value = Array.isArray(itemsList.value) ? itemsList.value : []
   } catch (e) {
     console.error("Не удалось загрузить списки связей:", e);
+    abilitiesList.value = []
+    traitsList.value = []
+    weaponsList.value = []
+    armorList.value = []
+    itemsList.value = []
   }
 }
 
 async function fetchCharacters() {
   loading.value = true
-  characters.value = await api.getCharacters()
-  loading.value = false
+  try {
+    const chars = await api.getCharacters() || []
+    chars.forEach(c => {
+      normalizeCharacterRelations(c)
+
+      if (!c.weapons) c.weapons = []
+      if (!c.armor) c.armor = []
+      if (!c.items) c.items = []
+      if (!c.traits) c.traits = []
+      if (!c.abilities) c.abilities = []
+      if (!c.custom_skills) c.custom_skills = []
+    })
+
+    characters.value = chars
+  } catch (e) {
+    console.error("Ошибка загрузки персонажей:", e)
+    characters.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 async function createCharacter(char) {
-  await api.createCharacter(char)
+  const payload = serializeCharacterForSend(char)
+  await api.createCharacter(payload)
   await fetchCharacters()
 }
 
 async function updateCharacter(char) {
-  await api.updateCharacter(char)
+  const payload = serializeCharacterForSend(char)
+  await api.updateCharacter(payload)
   await fetchCharacters()
 }
 
 async function deleteCharacter(char) {
-  await api.deleteCharacter(char.id)
+  const id = (char && (char.id ?? char.ID)) ? (char.id ?? char.ID) : char
+  await api.deleteCharacter(id)
   await fetchCharacters()
 }
 
 async function createNewCharacter() {
   tab.value = 'characters'
   await nextTick()
-  crudRef.value?.openCreate()
+  crudRef.value?.openCreate?.()
 }
 
-onMounted(() => {
-  fetchCharacters();
-  fetchAllRelatedData();
+onMounted(async () => {
+  await fetchAllRelatedData()
+  await fetchCharacters()
 });
 </script>
 
@@ -180,8 +335,8 @@ onMounted(() => {
                         :items="sizes"
                         label="Размер"
                         item-title="label"
-                    item-value="value"
-                    clearable
+                        item-value="value"
+                        clearable
                     />
                   </v-col>
                   <v-col cols="12" md="4">

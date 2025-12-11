@@ -39,6 +39,132 @@ window.CrudTable = {
 
     methods: {
 
+        _readId(v) {
+            if (v === null || v === undefined) return null;
+            if (typeof v === 'number' && Number.isFinite(v)) return Number(v);
+            if (typeof v === 'string') {
+                const s = v.trim();
+                if (/^\d+$/.test(s)) return Number(s);
+            }
+            if (typeof v === 'object') {
+                if ('id' in v && (typeof v.id === 'number' || typeof v.id === 'string')) {
+                    const n = Number(v.id);
+                    if (!Number.isNaN(n)) return n;
+                }
+                if ('ID' in v && (typeof v.ID === 'number' || typeof v.ID === 'string')) {
+                    const n = Number(v.ID);
+                    if (!Number.isNaN(n)) return n;
+                }
+            }
+            return null;
+        },
+
+        _readName(v) {
+            if (v === null || v === undefined) return null;
+            if (typeof v === 'string') return v;
+            if (typeof v === 'object') {
+                if ('name' in v && v.name) return String(v.name);
+                if ('Name' in v && v.Name) return String(v.Name);
+                if ('title' in v && v.title) return String(v.title);
+                if ('Title' in v && v.Title) return String(v.Title);
+            }
+            return null;
+        },
+
+        _extractTrailingNumberFromString(str) {
+            if (!str || typeof str !== 'string') return null;
+            const m = str.trim().match(/(\d+)\s*$/);
+            if (m) return Number(m[1]);
+            return null;
+        },
+
+        _valuesToIds(fieldValues, list) {
+            const out = [];
+
+            if (!fieldValues) return [];
+            const nameToId = new Map();
+            if (Array.isArray(list)) {
+                for (const e of list) {
+                    const nm = this._readName(e);
+                    const id = this._readId(e);
+                    if (nm && id != null) nameToId.set(String(nm).toLowerCase(), Number(id));
+                }
+            }
+
+            const pushIfValid = (x) => {
+                if (x == null) return;
+                const n = Number(x);
+                if (!Number.isNaN(n)) out.push(n);
+            };
+
+            const arr = Array.isArray(fieldValues) ? fieldValues : [fieldValues];
+
+            for (const v of arr) {
+                const idFromObj = this._readId(v);
+                if (idFromObj != null) {
+                    pushIfValid(idFromObj);
+                    continue;
+                }
+
+                if (typeof v === 'string') {
+                    const trailing = this._extractTrailingNumberFromString(v);
+                    if (trailing != null) {
+                        pushIfValid(trailing);
+                        continue;
+                    }
+
+                    const mapped = nameToId.get(v.toLowerCase());
+                    if (mapped != null) {
+                        pushIfValid(mapped);
+                        continue;
+                    }
+
+                    for (const [nameLower, idVal] of nameToId.entries()) {
+                        if (v.toLowerCase().includes(nameLower) || nameLower.includes(v.toLowerCase())) {
+                            pushIfValid(idVal);
+                            break;
+                        }
+                    }
+
+                    continue;
+                }
+
+            }
+
+            return Array.from(new Set(out.map(Number)));
+        },
+
+        normalizeRelations(item) {
+            if (!item || typeof item !== 'object') return item;
+
+            const lists = window.__globalEntityLists || {};
+
+            const weaponsList = lists.weapons || window.weapons || [];
+            const armorList = lists.armor || window.armor || [];
+            const itemsList = lists.items || window.items || [];
+            const traitsList = lists.traits || window.traits || [];
+            const abilitiesList = lists.abilities || window.abilities || [];
+
+            try {
+                item.weapons = this._valuesToIds(item.weapons, weaponsList);
+                item.armor = this._valuesToIds(item.armor, armorList);
+                item.items = this._valuesToIds(item.items, itemsList);
+                item.traits = this._valuesToIds(item.traits, traitsList);
+                item.abilities = this._valuesToIds(item.abilities, abilitiesList);
+
+                if (item.custom_skills) {
+                    item.custom_skills = this._valuesToIds(item.custom_skills, []);
+                } else if (item.skills) {
+                    item.custom_skills = this._valuesToIds(item.skills, []);
+                } else {
+                    item.custom_skills = [];
+                }
+            } catch (e) {
+            }
+
+            return item;
+        },
+
         toggleSearch() {
             this.searchOpen = !this.searchOpen
 
@@ -70,7 +196,17 @@ window.CrudTable = {
 
             this.editedIndex = this.items.findIndex(i => i[this.itemKey] === actualItem[this.itemKey]);
 
-            this.editedItem = Object.assign({}, actualItem, { formTab: 'main' });
+            const normalized = this.normalizeRelations(JSON.parse(JSON.stringify(actualItem)));
+
+            normalized.weapons = normalized.weapons || [];
+            normalized.armor = normalized.armor || [];
+            normalized.items = normalized.items || [];
+            normalized.traits = normalized.traits || [];
+            normalized.abilities = normalized.abilities || [];
+            normalized.custom_skills = normalized.custom_skills || [];
+
+
+            this.editedItem = Object.assign({}, normalized, { formTab: 'main' });
             this.dialog = true;
         },
 
@@ -123,7 +259,15 @@ window.CrudTable = {
 
         openCreate() {
             this.editedIndex = -1
-            this.editedItem = { formTab: 'main' }
+            this.editedItem = {
+                formTab: 'main',
+                weapons: [],
+                armor: [],
+                items: [],
+                traits: [],
+                abilities: [],
+                custom_skills: []
+            }
             this.dialog = true
             this.formValid = false
         }
