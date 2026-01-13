@@ -89,4 +89,9 @@ public class InMemoryTraitRepository implements TraitRepository {
     public boolean existsByName(String name) {
         return traitsByName.containsKey(name);
     }
+
+    @Override
+    public List<Trait> findAllByCharacterID(Long characterID) {
+        return List.of();
+    }
 }

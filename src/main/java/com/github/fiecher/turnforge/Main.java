@@ -8,17 +8,6 @@ import com.github.fiecher.turnforge.presentation.cli.Menu;
 public class Main {
 
     public static void main(String[] args) {
-        if (args.length > 0 && "web".equalsIgnoreCase(args[0])) {
-            System.out.println("Starting in WEB mode. (Deployment via WAR file required)");
-            System.out.println("To run in web mode, deploy as a WAR file to a servlet container or use an embedded server runner.");
-
-        } else {
-            System.out.println("Starting in CLI mode.");
-            startCli();
-        }
-    }
-
-    private static void startCli() {
         String salt = readSalt();
         DatabaseConfig dbConfig = DatabaseConfig.readDatabaseConfig();
         ApplicationConfigurator configurator = new ApplicationConfigurator();
@@ -42,5 +31,4 @@ public class Main {
         }
         return salt;
     }
-
 }

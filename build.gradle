@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'war'
     id 'application'
     id 'org.javamodularity.moduleplugin' version '1.8.12'
 }
@@ -27,11 +28,11 @@ application {
 }
 
 dependencies {
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    implementation("jakarta.json.bind:jakarta.json.bind-api:3.0.0")
+    implementation("org.eclipse:yasson:3.0.3")
     implementation("org.postgresql:postgresql:42.7.3")
-    implementation("jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}")
-    implementation("jakarta.json.bind:jakarta.json.bind-api:${jakartaJsonbVersion}")
-    implementation("org.eclipse:yasson:3.0.4")
-    implementation("org.eclipse.parsson:parsson:1.1.6")
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
@@ -40,14 +41,6 @@ test {
     useJUnitPlatform()
 }
 
-jlink {
-    imageZip = project.file("${buildDir}/distributions/app-image.zip")
-    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    launcher {
-        name = 'app'
-    }
-}
-
-jlinkZip {
-    group = 'distribution'
+war {
+    archiveFileName = "${rootProject.name}.war"
 }

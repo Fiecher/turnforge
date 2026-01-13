@@ -91,4 +91,9 @@ public class InMemoryArmorRepository implements ArmorRepository {
     public boolean existsByName(String name) {
         return armorByName.containsKey(name);
     }
+
+    @Override
+    public List<Armor> findAllByCharacterID(Long characterID) {
+        return List.of();
+    }
 }

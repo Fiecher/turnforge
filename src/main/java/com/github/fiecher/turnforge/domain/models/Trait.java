@@ -8,19 +8,19 @@ public class Trait {
     private String description;
     private String image;
     private String prerequisites;
-    private String type;
+    private String trait_type;
 
     public Trait(String name) {
         this.name = Objects.requireNonNull(name);
     }
 
-    public Trait(Long id, String name, String description, String image, String prerequisites, String type) {
+    public Trait(Long id, String name, String description, String image, String prerequisites, String trait_type) {
         this.id = id;
         this.name = Objects.requireNonNull(name);
         this.description = description;
         this.image = image;
         this.prerequisites = prerequisites;
-        this.type = type;
+        this.trait_type = trait_type;
     }
 
     public Long getID() {
@@ -63,12 +63,12 @@ public class Trait {
         this.prerequisites = prerequisites;
     }
 
-    public String getType() {
-        return type;
+    public String getTrait_type() {
+        return trait_type;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTrait_type(String trait_type) {
+        this.trait_type = trait_type;
     }
 
     @Override

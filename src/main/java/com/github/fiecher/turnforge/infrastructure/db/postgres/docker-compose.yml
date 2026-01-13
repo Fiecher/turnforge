@@ -1,9 +1,9 @@
 services:
   db:
     image: postgres:latest
-    container_name: dnd_postgres
+    container_name: dnd
     environment:
-      POSTGRES_DB: dnd_db
+      POSTGRES_DB: dnd_postgres
       POSTGRES_USER: user
       POSTGRES_PASSWORD: test123
       LANG: en_US.UTF-8

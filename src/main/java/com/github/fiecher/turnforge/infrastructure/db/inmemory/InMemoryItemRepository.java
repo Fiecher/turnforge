@@ -88,4 +88,9 @@ public class InMemoryItemRepository implements ItemRepository {
     public boolean existsByName(String name) {
         return itemsByName.containsKey(name);
     }
+
+    @Override
+    public List<Item> findAllByCharacterID(Long characterID) {
+        return List.of();
+    }
 }

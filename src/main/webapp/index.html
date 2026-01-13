@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurnForge Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.5.2/dist/vuetify.min.css" rel="stylesheet">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+        body { font-family: 'Roboto', sans-serif; background-color: #f5f5f5; }
+        .v-container { max-width: 1200px; }
+    </style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <v-app>
+        <v-app-bar color="primary" elevation="2">
+            <v-app-bar-title>TurnForge</v-app-bar-title>
+            <template v-slot:append>
+                <div v-if="isLoggedIn" class="d-flex align-center">
+                    <span class="mr-4 text-subtitle-1">Приветствую, {{ user?.login }}!</span>
+                    <v-btn icon="mdi-logout" variant="text" @click="logout" title="Выйти"></v-btn>
+                </div>
+            </template>
+        </v-app-bar>
+
+        <v-main>
+            <v-container class="mt-5 mb-10"> <v-row v-if="!isLoggedIn" justify="center">
+                <v-col cols="12" sm="8" md="4">
+                    <v-card class="pa-4" elevation="4">
+                        <v-card-title class="text-center text-h5">Вход в систему</v-card-title>
+                        <v-card-text>
+                            <v-form @submit.prevent="login" v-model="loginValid">
+                                <v-text-field
+                                        v-model="auth.login"
+                                        label="Логин"
+                                        prepend-inner-icon="mdi-account"
+                                        variant="outlined"
+                                        :rules="[rules.required]"></v-text-field>
+                                <v-text-field
+                                        v-model="auth.password"
+                                        label="Пароль"
+                                        type="password"
+                                        prepend-inner-icon="mdi-lock"
+                                        variant="outlined"
+                                        :rules="[rules.required]"></v-text-field>
+                                <div class="d-flex flex-column mt-4">
+                                    <v-btn type="submit" color="primary" :loading="loading" class="mb-2">Войти</v-btn>
+                                    <v-btn @click="register" color="secondary" variant="outlined" :loading="loading">Регистрация</v-btn>
+                                </div>
+                            </v-form>
+                        </v-card-text>
+                    </v-card>
+                </v-col>
+            </v-row>
+
+                <div v-else>
+                    <v-tabs v-model="tab" color="primary" align-tabs="center">
+                        <v-tab value="dashboard"><v-icon start>mdi-view-dashboard</v-icon>Дашборд</v-tab>
+                        <v-tab value="characters"><v-icon start>mdi-account-group</v-icon>Персонажи</v-tab>
+                        <v-tab value="abilities"><v-icon start>mdi-lightning-bolt</v-icon>Способности</v-tab>
+                        <v-tab value="traits"><v-icon start>mdi-face-recognition</v-icon>Черты</v-tab>
+                        <v-tab value="items"><v-icon start>mdi-treasure-chest</v-icon>Предметы</v-tab>
+                        <v-tab value="weapons"><v-icon start>mdi-sword</v-icon>Оружие</v-tab>
+                        <v-tab value="armor"><v-icon start>mdi-tshirt-crew</v-icon>Броня</v-tab>
+
+                    </v-tabs>
+
+                    <v-window v-model="tab" class="mt-4">
+
+                        <v-window-item value="dashboard">
+                            <v-row>
+
+                                <v-col cols="12" md="4">
+                                    <v-card elevation="4" height="100%">
+                                        <v-card-title class="d-flex align-center">
+                                            <v-icon start>mdi-account-group</v-icon>
+                                            Мои персонажи
+                                            <v-spacer></v-spacer>
+                                            <v-btn size="small" variant="text" @click="tab='characters'">
+                                                Все
+                                            </v-btn>
+                                        </v-card-title>
+
+                                        <v-divider></v-divider>
+
+                                        <v-list density="compact">
+                                            <v-list-item
+                                                    v-for="char in characters.slice(0, 6)"
+                                                    :key="char.id"
+                                                    @click="startEditCharacter(char)" link
+                                            >
+                                                <v-list-item-title>
+                                                    {{ char.name }}
+                                                </v-list-item-title>
+                                                <v-list-item-subtitle>
+                                                    {{ char.characterClass }}
+                                                </v-list-item-subtitle>
+                                            </v-list-item>
+
+                                            <v-list-item v-if="characters.length === 0">
+                                                <v-list-item-title class="text-grey">
+                                                    Нет персонажей
+                                                </v-list-item-title>
+                                            </v-list-item>
+                                        </v-list>
+                                    </v-card>
+                                </v-col>
+
+                                <v-col cols="12" md="8">
+                                    <v-row>
+
+                                        <v-col cols="12" sm="6">
+                                            <v-card color="indigo-lighten-1" theme="dark">
+                                                <v-card-title class="text-h4">{{ stats.abilities }}</v-card-title>
+                                                <v-card-subtitle>Всего способностей</v-card-subtitle>
+                                                <v-card-actions>
+                                                    <v-btn @click="tab='abilities'">Перейти</v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-col>
+
+                                        <v-col cols="12" sm="6">
+                                            <v-card color="teal-lighten-1" theme="dark">
+                                                <v-card-title class="text-h4">{{ stats.weapons }}</v-card-title>
+                                                <v-card-subtitle>Всего оружия</v-card-subtitle>
+                                                <v-card-actions>
+                                                    <v-btn @click="tab='weapons'">Перейти</v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-col>
+
+                                        <v-col cols="12" sm="6">
+                                            <v-card color="brown-lighten-1" theme="dark">
+                                                <v-card-title class="text-h4">{{ stats.armor }}</v-card-title>
+                                                <v-card-subtitle>Всего брони</v-card-subtitle>
+                                                <v-card-actions>
+                                                    <v-btn @click="tab='armor'">Перейти</v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-col>
+
+                                        <v-col cols="12" sm="6">
+                                            <v-card color="purple-lighten-1" theme="dark">
+                                                <v-card-title class="text-h4">{{ stats.items }}</v-card-title>
+                                                <v-card-subtitle>Всего предметов</v-card-subtitle>
+                                                <v-card-actions>
+                                                    <v-btn @click="tab='items'">Перейти</v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-col>
+
+                                        <v-col cols="12">
+                                            <v-card color="green-lighten-1" theme="dark">
+                                                <v-card-title class="text-h4">{{ stats.traits }}</v-card-title>
+                                                <v-card-subtitle>Всего черт</v-card-subtitle>
+                                                <v-card-actions>
+                                                    <v-btn @click="tab='traits'">Перейти</v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-col>
+
+                                    </v-row>
+                                </v-col>
+
+                            </v-row>
+                        </v-window-item>
+
+                        <v-window-item value="characters">
+                            <crud-table
+                                    ref="charactersCrud" title="Персонажи"
+                                    :headers="headers.characters"
+                                    :items="characters"
+                                    :loading="loading"
+                                    @refresh="fetchCharacters"
+                                    @create="createCharacter"
+                                    @update="updateCharacter"   @delete="deleteCharacter"   item-key="ID">
+                                <template v-slot:form="{ item }">
+
+                                    <v-tabs v-model="item.formTab" color="primary" density="compact" class="mb-4">
+                                        <v-tab value="main">Основное</v-tab>
+                                        <v-tab value="stats">Характеристики</v-tab>
+                                        <v-tab value="inventory">Инвентарь</v-tab>
+                                        <v-tab value="features">Особенности</v-tab>
+                                    </v-tabs>
+
+                                    <v-window v-model="item.formTab">
+                                        <v-window-item value="main">
+                                            <v-container>
+                                                <v-row>
+                                                    <v-col cols="12" md="6">
+                                                        <v-text-field
+                                                                v-model="item.name"
+                                                                label="Имя персонажа"
+                                                                :rules="[rules.required]"
+                                                                required
+                                                        ></v-text-field>
+                                                    </v-col>
+                                                    <v-col cols="12" md="6">
+                                                        <v-select
+                                                                v-model="item.characterClass"
+                                                                :items="['Воин', 'Маг', 'Плут', 'Жрец', 'Бард']"
+                                                                label="Класс"
+                                                                :rules="[rules.required]"
+                                                                required
+                                                        ></v-select>
+                                                    </v-col>
+
+                                                    <v-col cols="12" md="4">
+                                                        <v-text-field
+                                                                v-model.number="item.level"
+                                                                type="number"
+                                                                label="Уровень"
+                                                                min="1"
+                                                                required
+                                                        ></v-text-field>
+                                                    </v-col>
+                                                    <v-col cols="12" md="4">
+                                                        <v-text-field v-model="item.race" label="Раса"></v-text-field>
+                                                    </v-col>
+                                                    <v-col cols="12" md="4">
+                                                        <v-text-field v-model.number="item.age" type="number" label="Возраст"></v-text-field>
+                                                    </v-col>
+
+                                                    <v-select
+                                                            v-model="item.size"
+                                                            :items="[
+        { title: 'Tiny', value: 'TINY' },
+        { title: 'Small', value: 'SMALL' },
+        { title: 'Medium', value: 'MEDIUM' },
+        { title: 'Large', value: 'LARGE' },
+        { title: 'Huge', value: 'HUGE' },
+        { title: 'Gargantuan', value: 'GARGANTUAN' }
+    ]"
+                                                            item-title="title"
+                                                            item-value="value"
+                                                            label="Размер">
+                                                    </v-select>
+
+                                                    <v-col cols="12" md="4">
+                                                        <v-text-field v-model="item.subclass" label="Подкласс"></v-text-field>
+                                                    </v-col>
+                                                    <v-col cols="12" md="4">
+                                                        <v-text-field v-model="item.background" label="Предыстория"></v-text-field>
+                                                    </v-col>
+
+                                                    <v-col cols="12">
+                                                        <v-textarea v-model="item.description" label="Описание/Биография" rows="3"></v-textarea>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-container>
+                                        </v-window-item>
+
+                                        <v-window-item value="stats">
+                                            <v-container>
+                                                <v-row>
+                                                    <v-col cols="4">
+                                                        <v-text-field v-model.number="item.strength" label="Strength (СИЛ)" type="number" min="0" required></v-text-field>
+                                                    </v-col>
+                                                    <v-col cols="4">
+                                                        <v-text-field v-model.number="item.dexterity" label="Dexterity (ЛОВ)" type="number" min="0" required></v-text-field>
+                                                    </v-col>
+                                                    <v-col cols="4">
+                                                        <v-text-field v-model.number="item.constitution" label="Constitution (ВЫН)" type="number" min="0" required></v-text-field>
+                                                    </v-col>
+                                                    <v-col cols="4">
+                                                        <v-text-field v-model.number="item.intelligence" label="Intelligence (ИНТ)" type="number" min="0" required></v-text-field>
+                                                    </v-col>
+                                                    <v-col cols="4">
+                                                        <v-text-field v-model.number="item.wisdom" label="Wisdom (МУД)" type="number" min="0" required></v-text-field>
+                                                    </v-col>
+                                                    <v-col cols="4">
+                                                        <v-text-field v-model.number="item.charisma" label="Charisma (ХАР)" type="number" min="0" required></v-text-field>
+                                                    </v-col>
+
+                                                    <v-col cols="12">
+                                                        <v-text-field v-model="item.spellcasting_ability" label="Базовая характеристика заклинаний"></v-text-field>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-container>
+                                        </v-window-item>
+
+                                        <v-window-item value="inventory">
+                                            <v-container>
+                                                <v-row>
+                                                    <v-col cols="12">
+                                                        <v-text-field
+                                                                v-model.number="item.money"
+                                                                label="Золото (Money)"
+                                                                type="number"
+                                                                min="0"
+                                                                required
+                                                        ></v-text-field>
+                                                    </v-col>
+
+                                                    <v-col cols="12" md="6">
+                                                        <v-select
+                                                                v-model="item.weapons"
+                                                                :items="weapons"
+                                                                item-title="name"
+                                                                item-value="ID"
+                                                                label="Оружие"
+                                                                multiple
+                                                                chips
+                                                                clearable
+                                                        ></v-select>
+                                                    </v-col>
+                                                    <v-col cols="12" md="6">
+                                                        <v-select
+                                                                v-model="item.armor"
+                                                                :items="armor"
+                                                                item-title="name"
+                                                                item-value="ID"
+                                                                label="Броня"
+                                                                multiple
+                                                                chips
+                                                                clearable
+                                                        ></v-select>
+                                                    </v-col>
+                                                    <v-col cols="12">
+                                                        <v-select
+                                                                v-model="item.items"
+                                                                :items="items"
+                                                                item-title="name"
+                                                                item-value="ID"
+                                                                label="Предметы (Инвентарь)"
+                                                                multiple
+                                                                chips
+                                                                clearable
+                                                        ></v-select>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-container>
+                                        </v-window-item>
+
+                                        <v-window-item value="features">
+                                            <v-container>
+                                                <v-row>
+                                                    <v-col cols="12">
+                                                        <v-select
+                                                                v-model="item.traits"
+                                                                :items="traits"
+                                                                item-title="name"
+                                                                item-value="ID"
+                                                                label="Черты"
+                                                                multiple
+                                                                chips
+                                                                clearable
+                                                        ></v-select>
+                                                    </v-col>
+                                                    <v-col cols="12">
+                                                        <v-select
+                                                                v-model="item.abilities"
+                                                                :items="abilities"
+                                                                item-title="name"
+                                                                item-value="ID"
+                                                                label="Способности / Заклинания"
+                                                                multiple
+                                                                chips
+                                                                clearable
+                                                        ></v-select>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-container>
+                                        </v-window-item>
+                                    </v-window>
+                                </template>
+                            </crud-table>
+                        </v-window-item>
+
+                        <v-window-item value="abilities">
+                            <crud-table
+                                    title="Способности"
+                                    :headers="headers.abilities"
+                                    :items="abilities"
+                                    :loading="loading"
+                                    @refresh="fetchAbilities"
+                                    @create="createAbility"
+                                    @update="updateAbility"
+                                    @delete="deleteAbility"
+                                    item-key="ID">
+                                <template v-slot:form="{ item }">
+                                    <v-text-field v-model="item.name" label="Название" :rules="[rules.required]"></v-text-field>
+
+                                    <v-text-field v-model="item.damage" label="Урон (например, 2d6)"></v-text-field>
+                                    <v-textarea v-model="item.description" label="Описание" rows="2"></v-textarea>
+                                    <v-row>
+                                        <v-col cols="6"><v-text-field v-model="item.type" label="Тип"></v-text-field></v-col>
+                                        <v-col cols="6"><v-text-field v-model.number="item.level" type="number" label="Уровень"></v-text-field></v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="4"><v-text-field v-model="item.time" label="Время"></v-text-field></v-col>
+                                        <v-col cols="4"><v-text-field v-model="item.range" label="Дальность"></v-text-field></v-col>
+                                        <v-col cols="4"><v-text-field v-model="item.duration" label="Длительность"></v-text-field></v-col>
+                                    </v-row>
+                                </template>
+                            </crud-table>
+                        </v-window-item>
+
+                        <v-window-item value="traits">
+                            <crud-table
+                                    ref="traitsCrud" title="Черты"
+                                    :headers="headers.traits"
+                                    :items="traits"
+                                    :loading="loading"
+                                    @refresh="fetchTraits"
+                                    @create="createTrait"
+                                    @update="updateTrait"
+                                    @delete="deleteTrait"
+                                    item-key="ID">
+                                <template v-slot:form="{ item }">
+                                    <v-container>
+                                        <v-row>
+                                            <v-col cols="12">
+                                                <v-text-field
+                                                        v-model="item.name"
+                                                        label="Название черты"
+                                                        :rules="[rules.required]"
+                                                        required
+                                                ></v-text-field>
+                                            </v-col>
+
+                                            <v-col cols="12" md="6">
+                                                <v-text-field
+                                                        v-model="item.trait_type"
+                                                        label="Тип черты"
+                                                ></v-text-field>
+                                            </v-col>
+
+                                            <v-col cols="12" md="6">
+                                                <v-text-field
+                                                        v-model="item.prerequisites"
+                                                        label="Предпосылки (Prerequisites)"
+                                                ></v-text-field>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <v-textarea
+                                                        v-model="item.description"
+                                                        label="Описание"
+                                                        rows="3"
+                                                ></v-textarea>
+                                            </v-col>
+                                        </v-row>
+                                    </v-container>
+                                </template>
+                            </crud-table>
+                        </v-window-item>
+
+                        <v-window-item value="items">
+                            <crud-table
+                                    ref="itemsCrud" title="Предметы"
+                                    :headers="headers.items"
+                                    :items="items"
+                                    :loading="loading"
+                                    @refresh="fetchItems"
+                                    @create="createItem"
+                                    @update="updateItem"
+                                    @delete="deleteItem"
+                                    item-key="ID">
+                                <template v-slot:form="{ item }">
+                                    <v-container>
+                                        <v-row>
+                                            <v-col cols="12">
+                                                <v-text-field
+                                                        v-model="item.name"
+                                                        label="Название предмета"
+                                                        :rules="[rules.required]"
+                                                        required
+                                                ></v-text-field>
+                                            </v-col>
+
+                                            <v-col cols="12" md="6">
+                                                <v-text-field
+                                                        v-model.number="item.price"
+                                                        type="number"
+                                                        label="Цена (в монетах)"
+                                                        min="0"
+                                                ></v-text-field>
+                                            </v-col>
+
+                                            <v-col cols="12" md="6">
+                                                <v-text-field
+                                                        v-model.number="item.weight"
+                                                        type="number"
+                                                        label="Вес"
+                                                        min="0"
+                                                ></v-text-field>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <v-textarea
+                                                        v-model="item.description"
+                                                        label="Описание"
+                                                        rows="3"
+                                                ></v-textarea>
+                                            </v-col>
+                                        </v-row>
+                                    </v-container>
+                                </template>
+                            </crud-table>
+                        </v-window-item>
+
+                        <v-window-item value="weapons">
+                            <crud-table
+                                    title="Оружие"
+                                    :headers="headers.weapons"
+                                    :items="weapons"
+                                    :loading="loading"
+                                    @refresh="fetchWeapons"
+                                    @create="createWeapon"
+                                    @update="updateWeapon"
+                                    @delete="deleteWeapon"
+                                    item-key="ID">
+                                <template v-slot:form="{ item }">
+                                    <v-text-field v-model="item.name" label="Название" :rules="[rules.required]"></v-text-field>
+
+                                    <v-text-field v-model="item.damage" label="Урон"></v-text-field>
+                                    <v-text-field v-model="item.type" label="Тип"></v-text-field>
+                                    <v-text-field v-model.number="item.price" type="number" label="Цена (зм)"></v-text-field>
+                                    <v-text-field v-model.number="item.weight" type="number" label="Вес"></v-text-field>
+                                    <v-textarea v-model="item.properties" label="Свойства" rows="2"></v-textarea>
+                                    <v-textarea v-model="item.description" label="Описание" rows="2"></v-textarea>
+                                </template>
+                            </crud-table>
+                        </v-window-item>
+
+                        <v-window-item value="armor">
+                            <crud-table
+                                    ref="armorCrud" title="Броня"
+                                    :headers="headers.armor"
+                                    :items="armor"
+                                    :loading="loading"
+                                    @refresh="fetchArmor"
+                                    @create="createArmor"
+                                    @update="updateArmor"
+                                    @delete="deleteArmor"
+                                    item-key="ID">
+                                <template v-slot:form="{ item }">
+                                    <v-container>
+                                        <v-row>
+                                            <v-col cols="12">
+                                                <v-text-field
+                                                        v-model="item.name"
+                                                        label="Название брони"
+                                                        :rules="[rules.required]"
+                                                        required
+                                                ></v-text-field>
+                                            </v-col>
+
+                                            <v-col cols="12" md="6">
+                                                <v-text-field
+                                                        v-model.number="item.AC"
+                                                        type="number"
+                                                        label="Класс брони (AC)"
+                                                        min="0"
+                                                ></v-text-field>
+                                            </v-col>
+
+                                            <v-col cols="12" md="6">
+                                                <v-select
+                                                        v-model="item.type"
+                                                        :items="['Light', 'Medium', 'Heavy', 'Shield']"
+                                                        label="Тип брони"
+                                                ></v-select>
+                                            </v-col>
+
+                                            <v-col cols="12" md="6">
+                                                <v-text-field
+                                                        v-model.number="item.weight"
+                                                        type="number"
+                                                        label="Вес"
+                                                        min="0"
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" md="6">
+                                                <v-text-field
+                                                        v-model.number="item.price"
+                                                        type="number"
+                                                        label="Цена (в ЗМ)"
+                                                        min="0"
+                                                ></v-text-field>
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <v-textarea v-model="item.description" label="Описание" rows="3"></v-textarea>
+                                            </v-col>
+                                        </v-row>
+                                    </v-container>
+                                </template>
+                            </crud-table>
+                        </v-window-item>
+
+                    </v-window>
+                </div>
+
+                <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+                    {{ snackbar.text }}
+                    <template v-slot:actions>
+                        <v-btn color="white" variant="text" @click="snackbar.show = false">Закрыть</v-btn>
+                    </template>
+                </v-snackbar>
+
+            </v-container>
+        </v-main>
+    </v-app>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@3.5.2/dist/vuetify.min.js"></script>
+
+<script src="./js/api.js"></script>
+<script src="js/components/crudtable.js"></script>
+<script src="./js/main.js"></script>
+
+</body>
+</html>

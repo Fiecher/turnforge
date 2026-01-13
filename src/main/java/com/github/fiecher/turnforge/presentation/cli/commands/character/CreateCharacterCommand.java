@@ -1,9 +1,7 @@
 package com.github.fiecher.turnforge.presentation.cli.commands.character;
 
-import com.github.fiecher.turnforge.app.dtos.responses.CharacterCreationResponse;
-import com.github.fiecher.turnforge.app.dtos.requests.CreateCharacterRequest;
 import com.github.fiecher.turnforge.app.dtos.responses.UserDetails;
-import com.github.fiecher.turnforge.app.usecase.CreateCharacterUseCase;
+import com.github.fiecher.turnforge.app.usecase.character.CreateCharacterUseCase;
 import com.github.fiecher.turnforge.presentation.cli.ApplicationContext;
 import com.github.fiecher.turnforge.presentation.cli.commands.Command;
 import com.github.fiecher.turnforge.presentation.cli.input.InputReader;
@@ -39,11 +37,6 @@ public class CreateCharacterCommand implements Command {
             view.showMessage("\n --- Creating Character ---");
             String name = reader.readLine("Enter name: ");
             String characterClass = reader.readLine("Enter class: ");
-            CharacterCreationResponse characterID = createCharacterUseCase.execute(
-                    new CreateCharacterRequest(userID, name, characterClass)
-            );
-
-            view.showSuccess("Character '" + name + "' created successfully with ID: " + characterID.characterID());
 
         } catch (Exception e) {
             view.showError("Creating character failed:" + e.getMessage());

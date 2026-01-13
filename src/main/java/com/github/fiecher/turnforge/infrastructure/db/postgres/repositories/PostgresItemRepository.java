@@ -225,4 +225,30 @@ public class PostgresItemRepository implements ItemRepository {
             throw new RuntimeException("Database error during existsByName operation.", e);
         }
     }
+
+    @Override
+    public List<Item> findAllByCharacterID(Long characterID) {
+        final String SQL =
+                "SELECT i.id, i.name, i.description, i.image, i.weight, i.price, i.created_at, i.updated_at " +
+                        "FROM items i " +
+                        "JOIN characters_items ci ON i.id = ci.item_id " +
+                        "WHERE ci.character_id = ?";
+
+        List<Item> result = new ArrayList<>();
+        try (Connection conn = connectionManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setLong(1, characterID);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(mapResultSetToItem(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("DB error fetching items for character " + characterID, e);
+        }
+        return result;
+    }
+
 }

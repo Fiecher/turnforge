@@ -236,5 +236,32 @@ public class PostgresWeaponRepository implements WeaponRepository {
             throw new RuntimeException("Database error during existsByName operation.", e);
         }
     }
+
+    @Override
+    public List<Weapon> findAllByCharacterID(Long characterID) {
+        final String SQL =
+                "SELECT w.id, w.name, w.description, w.image, w.damage, w.type, w.properties, w.weight, w.price, w.created_at, w.updated_at " +
+                        "FROM weapons w " +
+                        "JOIN characters_weapons cw ON w.id = cw.weapon_id " +
+                        "WHERE cw.character_id = ?";
+
+        List<Weapon> result = new ArrayList<>();
+        try (Connection conn = connectionManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setLong(1, characterID);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Weapon w = mapResultSetToWeapon(rs);
+                    result.add(w);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("DB error fetching weapons for character " + characterID, e);
+        }
+        return result;
+    }
+
 }
 

@@ -88,4 +88,9 @@ public class InMemoryWeaponRepository implements WeaponRepository {
     public boolean existsByName(String name) {
         return weaponsByName.containsKey(name);
     }
+
+    @Override
+    public List<Weapon> findAllByCharacterID(Long characterID) {
+        return List.of();
+    }
 }
