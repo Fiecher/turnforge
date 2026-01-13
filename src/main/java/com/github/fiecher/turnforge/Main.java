@@ -25,7 +25,7 @@ public class Main {
 
     private static String readSalt() {
         String salt = System.getenv("SALT");
-        if (salt == null){
+        if (salt == null) {
             salt = PasswordGenerator.generateSalt(18);
             System.out.println("[WARN] SALT not set, using generated default.");
         }

@@ -13,24 +13,24 @@ public class PostgresConnectionManager {
     private static String DRIVER;
     private final ThreadLocal<Connection> threadConnection = new ThreadLocal<>();
 
-    private PostgresConnectionManager(String URL, String USER, String PASSWORD, String DRIVER) {
-        PostgresConnectionManager.URL = URL;
-        PostgresConnectionManager.USER = USER;
-        PostgresConnectionManager.PASSWORD = PASSWORD;
-        PostgresConnectionManager.DRIVER = DRIVER;
+    private PostgresConnectionManager(String url, String user, String password, String driver) {
+        PostgresConnectionManager.URL = url;
+        PostgresConnectionManager.USER = user;
+        PostgresConnectionManager.PASSWORD = password;
+        PostgresConnectionManager.DRIVER = driver;
         try {
-            Class.forName(DRIVER);
+            Class.forName(driver);
         } catch (ClassNotFoundException e) {
-            throw new ExceptionInInitializerError("PostgreSQL JDBC Driver not found: " + DRIVER);
+            throw new ExceptionInInitializerError("PostgreSQL JDBC Driver not found: " + driver);
         }
     }
 
-    public static PostgresConnectionManager init(String URL, String USER, String PASSWORD, String DRIVER) {
+    public static PostgresConnectionManager init(String url, String user, String password, String driver) {
         if (INSTANCE != null) {
             throw new IllegalStateException("PostgresConnectionManager is already initialized");
         }
 
-        INSTANCE = new PostgresConnectionManager(URL, USER, PASSWORD, DRIVER);
+        INSTANCE = new PostgresConnectionManager(url, user, password, driver);
         return INSTANCE;
     }
 

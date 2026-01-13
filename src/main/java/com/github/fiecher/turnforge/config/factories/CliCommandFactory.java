@@ -23,18 +23,18 @@ public class CliCommandFactory {
     }
 
     public CreateUserCommand createCreateUserCommand() {
-        return new CreateUserCommand(useCases.getCreateUserUseCase(), view, reader);
+        return new CreateUserCommand(useCases.createUserUseCase(), view, reader);
     }
 
     public LoginUserCommand createLoginUserCommand() {
-        return new LoginUserCommand(useCases.getLoginUserUseCase(), applicationContext, view, reader);
+        return new LoginUserCommand(useCases.loginUserUseCase(), applicationContext, view, reader);
     }
 
     public CreateCharacterCommand createCreateCharacterCommand() {
-        return new CreateCharacterCommand(useCases.getCreateCharacterUseCase(), applicationContext, view, reader);
+        return new CreateCharacterCommand(useCases.createCharacterUseCase(), applicationContext, view, reader);
     }
 
     public GetCharactersCommand createGetCharactersCommand() {
-        return new GetCharactersCommand(useCases.getGetCharactersUseCase(), applicationContext, view);
+        return new GetCharactersCommand(useCases.getCharactersUseCase(), applicationContext, view);
     }
 }

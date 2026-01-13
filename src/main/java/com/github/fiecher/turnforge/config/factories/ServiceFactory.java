@@ -1,6 +1,5 @@
 package com.github.fiecher.turnforge.config.factories;
 
-
 import com.github.fiecher.turnforge.config.containers.RepositoryContainer;
 import com.github.fiecher.turnforge.config.containers.ServiceContainer;
 import com.github.fiecher.turnforge.domain.services.*;
